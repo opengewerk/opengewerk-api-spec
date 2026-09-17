@@ -1,6 +1,11 @@
-# OpenGewerk API-Spezifikation
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/opengewerk/.github/main/brand/opengewerk-logo-dark.svg">
+    <img alt="OpenGewerk" src="https://raw.githubusercontent.com/opengewerk/.github/main/brand/opengewerk-logo.svg" width="320">
+  </picture>
+</p>
 
-**Der gemeinsame Vertrag zwischen OpenGewerk und OpenGewerk Kanzlei**
+<p align="center"><strong>Gemeinsamer API-Vertrag zwischen OpenGewerk und OpenGewerk Kanzlei</strong></p>
 
 ## Zweck
 
