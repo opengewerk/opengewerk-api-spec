@@ -14,7 +14,7 @@ Quelle: Planungskonzept OpenGewerk Kanzlei v1.1, Abschnitt 2.5.
 | `write:proposals` | Buchungs-/Kontierungsvorschläge (Mandant bestätigt) | optional |
 | `write:coa` | Kontenrahmen-Profil, Automatikkonten pushen | optional |
 | `write:closing` | Abschlussbuchungen direkt buchen | optional, nur Berufsträger |
-| `export:audit` | Z1–Z3/GDPdU-Export auslösen | optional |
+| `export:audit` | Z1-Z3/GDPdU-Export auslösen | optional |
 
 ## Zuordnung zu den Endpunkten
 
