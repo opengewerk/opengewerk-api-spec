@@ -1,0 +1,320 @@
+openapi: 3.1.0
+
+info:
+  title: OpenGewerk Kanzlei-API
+  version: 0.1.0
+  summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
+  description: |
+    Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
+    einen angebundenen Kanzlei-Hub bereitstellt. Der Mandant ist der Server, der
+    Hub ist der Client. Die Verbindung wird immer vom Mandanten aus aufgebaut, und
+    jeder Zugriff ist durch Scopes begrenzt, die der Mandant einzeln vergibt und
+    jederzeit widerrufen kann.
+
+    Die Endpunkte sind in dieser Fassung Platzhalter. Pfade, Methoden und Scopes
+    stehen fest, die Nutzlasten werden mit den JSON-Schemas unter `schemas/`
+    nachgezogen.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+  x-konventionen:
+    betraege: >
+      Alle Geldbeträge sind ganzzahlige Cent-Werte im Feldtyp integer.
+      Gleitkommazahlen sind an keiner Stelle zulässig, weder in Anfragen noch in
+      Antworten. Die Währung steht als eigenes Feld nach ISO 4217, Vorgabe EUR.
+    datumsangaben: >
+      Alle Datums- und Zeitangaben folgen ISO 8601. Ein reines Datum wird als
+      YYYY-MM-DD übertragen, ein Zeitpunkt als YYYY-MM-DDTHH:MM:SSZ in UTC,
+      ein Zeitraum über getrennte Felder von und bis, jeweils einschließlich.
+    steuerschluessel: >
+      Steuerschlüssel folgen der DATEV-Konvention, damit der spätere Export
+      verlustfrei bleibt.
+    paginierung: >
+      Listen sind paginiert und liefern ETag; der Hub sendet If-None-Match und
+      bekommt bei unverändertem Stand 304 zurück.
+    idempotenz: >
+      Schreibende Aufrufe verlangen den Kopf Idempotency-Key. Ein wiederholter
+      Aufruf mit demselben Schlüssel erzeugt keinen zweiten Datensatz.
+
+servers:
+  - url: https://{mandant}/api/kanzlei/v1
+    description: Die OpenGewerk-Instanz des Mandanten
+    variables:
+      mandant:
+        default: betrieb.example
+        description: Hostname der Mandanten-Instanz, vom Mandanten beim Handshake mitgeteilt
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Buchhaltung
+    description: Lesende Sicht auf Journal, Konten, Salden und offene Posten
+  - name: Belege
+    description: Belegbilder und E-Rechnungs-XML einzelner Belege
+  - name: Perioden
+    description: Festschreibungsstatus und Werte der Umsatzsteuer-Voranmeldung
+  - name: Zusammenarbeit
+    description: Rückfragen der Kanzlei und Buchungsvorschläge zur Freigabe durch den Mandanten
+  - name: Stammdaten
+    description: Kontenrahmen-Profil der Kanzlei
+  - name: Nachweise
+    description: Betriebsprüfungs-Export und Zugriffsprotokoll
+
+paths:
+  /periods:
+    get:
+      tags: [Perioden]
+      operationId: periodenLesen
+      summary: Perioden mit Festschreibungsstatus abrufen
+      description: |
+        Liefert die Buchungsperioden des Mandanten mit Festschreibungsstatus und
+        den Werten der Umsatzsteuer-Voranmeldung. Benötigt den Scope `read:periods`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /journal:
+    get:
+      tags: [Buchhaltung]
+      operationId: journalLesen
+      summary: Journalzeilen eines Zeitraums abrufen
+      description: |
+        Liefert die Buchungssätze des Mandanten für einen Zeitraum, paginiert.
+        Festgeschriebene Buchungen sind als solche gekennzeichnet.
+        Benötigt den Scope `read:ledger`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /accounts:
+    get:
+      tags: [Buchhaltung]
+      operationId: kontenLesen
+      summary: Kontenplan des Mandanten abrufen
+      description: |
+        Liefert den Kontenplan mit Kontonummer, Bezeichnung, Kontenrahmen und
+        Automatikkonten-Kennzeichen. Benötigt den Scope `read:ledger`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /balances:
+    get:
+      tags: [Buchhaltung]
+      operationId: saldenLesen
+      summary: Salden je Konto für einen Stichtag abrufen
+      description: |
+        Liefert die Summen- und Saldenliste zu einem Stichtag.
+        Benötigt den Scope `read:ledger`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /open-items:
+    get:
+      tags: [Buchhaltung]
+      operationId: offenePostenLesen
+      summary: Offene Posten der Debitoren und Kreditoren abrufen
+      description: |
+        Liefert die offenen Posten mit Fälligkeit, Mahnstufe und Restbetrag.
+        Benötigt den Scope `read:ledger`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /documents/{id}:
+    get:
+      tags: [Belege]
+      operationId: belegLesen
+      summary: Einzelnen Beleg mit Bild und E-Rechnungs-XML abrufen
+      description: |
+        Liefert einen einzelnen Beleg zur Anzeige im Hub. Der Hub speichert
+        Belegdaten nicht dauerhaft. Benötigt den Scope `read:documents`.
+      parameters:
+        - $ref: "#/components/parameters/BelegId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+        "404":
+          $ref: "#/components/responses/NichtGefunden"
+
+  /inquiries:
+    post:
+      tags: [Zusammenarbeit]
+      operationId: rueckfrageStellen
+      summary: Rückfrage der Kanzlei an einem Beleg anlegen
+      description: |
+        Legt eine Rückfrage an, die im Mandantensystem am Beleg und im
+        Rückfragen-Postfach erscheint. Benötigt den Scope `write:comments`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /proposals:
+    post:
+      tags: [Zusammenarbeit]
+      operationId: buchungsvorschlagEinreichen
+      summary: Buchungs- oder Kontierungsvorschlag einreichen
+      description: |
+        Reicht einen Vorschlag ein, den der Mandant mit einem Klick bestätigt.
+        Benötigt den Scope `write:proposals`. Direktes Buchen ohne Bestätigung
+        verlangt zusätzlich den Scope `write:closing`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /coa-profile:
+    put:
+      tags: [Stammdaten]
+      operationId: kontenrahmenProfilSetzen
+      summary: Kontenrahmen-Profil der Kanzlei übertragen
+      description: |
+        Überträgt Standard-Kontierungen, Automatikkonten und Steuerschlüssel an
+        den Mandanten. Der Mandant sieht eine Vorschau vor der Übernahme.
+        Benötigt den Scope `write:coa`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /audit-export:
+    post:
+      tags: [Nachweise]
+      operationId: betriebspruefungsExportAusloesen
+      summary: Export für die Betriebsprüfung auslösen
+      description: |
+        Stößt einen Z1-, Z2- oder Z3-Export nach GDPdU an. Der Export läuft im
+        Mandantensystem, der Hub bekommt einen Verweis auf das Ergebnis.
+        Benötigt den Scope `export:audit`.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+        "403":
+          $ref: "#/components/responses/ScopeFehlt"
+
+  /access-log:
+    get:
+      tags: [Nachweise]
+      operationId: zugriffsprotokollLesen
+      summary: Zugriffsprotokoll der eigenen Kanzlei abrufen
+      description: |
+        Liefert die protokollierten Zugriffe der anfragenden Kanzlei auf diese
+        Instanz. Dieselben Einträge sieht der Mandant in seiner Oberfläche.
+        Das Protokoll ist für beide Seiten einsehbar und braucht keinen
+        zusätzlichen Scope.
+      responses:
+        "200":
+          $ref: "#/components/responses/Erfolg"
+        "401":
+          $ref: "#/components/responses/NichtAuthentifiziert"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Der beim Handshake ausgehandelte Token wird als Bearer-Token gesendet.
+        Der Token ist an die Hub-Instanz gebunden (mTLS-Zertifikat oder DPoP),
+        rotierbar und läuft bei Inaktivität ab. Der Mandant kann ihn jederzeit
+        sofort sperren.
+
+  parameters:
+    BelegId:
+      name: id
+      in: path
+      required: true
+      description: Kennung des Belegs im Mandantensystem
+      schema:
+        type: string
+
+  schemas:
+    Platzhalter:
+      title: Platzhalter
+      description: |
+        Die Nutzlast dieses Endpunkts ist noch nicht festgelegt. Die verbindlichen
+        Schemas entstehen unter `schemas/` und werden an dieser Stelle eingehängt,
+        sobald sie vorliegen.
+
+    Fehler:
+      title: Fehler
+      description: Einheitliche Fehlerantwort aller Endpunkte
+      type: object
+      required: [code, meldung]
+      properties:
+        code:
+          type: string
+          description: Maschinenlesbarer Fehlercode
+        meldung:
+          type: string
+          description: Beschreibung des Fehlers für Menschen
+        scope:
+          type: string
+          description: Der fehlende Scope, falls der Fehler daran liegt
+
+  responses:
+    Erfolg:
+      description: Anfrage erfolgreich
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Platzhalter"
+
+    NichtAuthentifiziert:
+      description: Kein oder ungültiger Token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Fehler"
+
+    ScopeFehlt:
+      description: Der Mandant hat den nötigen Scope nicht freigegeben
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Fehler"
+
+    NichtGefunden:
+      description: Die angeforderte Ressource gibt es nicht
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Fehler"

@@ -1,0 +1,72 @@
+# OpenGewerk API-Spezifikation
+
+**Der gemeinsame Vertrag zwischen OpenGewerk und OpenGewerk Kanzlei**
+
+## Zweck
+
+Die Handwerkersoftware [`opengewerk`](https://github.com/opengewerk/opengewerk) und der Kanzlei-Hub [`opengewerk-kanzlei`](https://github.com/opengewerk/opengewerk-kanzlei) sind eigenständige Projekte mit eigenen Releases. Damit sie sich nicht gegenseitig brechen, liegt der Schnittstellenvertrag in diesem dritten Repository: OpenAPI-Definition, JSON-Schemas und Konformitätstests an einer Stelle, versioniert nach SemVer. Beide Seiten deklarieren, welche Version der Spezifikation sie unterstützen, und können unabhängig voneinander veröffentlichen.
+
+Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersoftware ist damit der Server dieser Spezifikation, der Hub ist der Client. Welche Ressourcen ein Hub sehen darf, entscheidet allein der Mandant über Scopes.
+
+## Aufbau des Repos
+
+| Pfad | Inhalt |
+| --- | --- |
+| `openapi/opengewerk-kanzlei-api.yaml` | Die OpenAPI-3.1-Definition der Kanzlei-API |
+| `schemas/` | JSON-Schemas für die Nutzlasten, sobald die Endpunkte inhaltlich ausgearbeitet sind |
+| `conformance/` | Konformitätstests, mit denen eine Implementierung sich selbst prüfen kann |
+| `docs/scopes.md` | Die Scopes, die ein Mandant an eine Kanzlei vergeben kann |
+| `docs/webhooks.md` | Die Ereignisse, die das Mandantensystem an den Hub meldet |
+
+## Versionierung
+
+Die Spezifikation folgt der [Semantischen Versionierung](https://semver.org/lang/de/). Die aktuelle Version steht im `info.version`-Feld der OpenAPI-Datei.
+
+Ein **Breaking Change** und damit eine neue Hauptversion ist:
+
+- Ein Endpunkt oder eine Operation fällt weg oder wird umbenannt.
+- Ein bisher optionales Feld einer Anfrage wird zur Pflicht.
+- Ein Feld einer Antwort fällt weg oder ändert seinen Datentyp.
+- Die Bedeutung eines vorhandenen Feldes ändert sich, auch wenn Name und Typ gleich bleiben.
+- Ein zusätzlicher Scope wird für einen bestehenden Endpunkt verlangt.
+
+Rückwärtskompatibel und damit eine Nebenversion ist das Hinzufügen neuer Endpunkte, neuer optionaler Felder oder neuer Enum-Werte, sofern Clients unbekannte Werte tolerieren. Reine Textkorrekturen an Beschreibungen sind eine Patch-Version.
+
+Solange die Hauptversion 0 ist, kann sich der Vertrag noch in jeder Nebenversion ändern. Stabil wird er mit 1.0.0.
+
+## Konformitätstests
+
+Der Ordner `conformance/` ist bislang leer bis auf seine Beschreibung. Geplant ist eine Testsuite, die eine laufende Implementierung gegen die Spezifikation prüft: vorhandene Endpunkte, Pflichtfelder, Fehlercodes, Verhalten bei fehlendem Scope, ETag- und Idempotenz-Verhalten. Bis dahin ist die OpenAPI-Datei die einzige verbindliche Quelle.
+
+## Verwendung
+
+1. Die Spezifikation auf eine feste Version binden, entweder über einen Git-Tag oder als Submodul.
+2. Aus `openapi/opengewerk-kanzlei-api.yaml` Server-Gerüst beziehungsweise Client generieren oder von Hand implementieren.
+3. Die unterstützte Spec-Version im eigenen System sichtbar machen, damit die Gegenseite die Kompatibilität prüfen kann.
+4. Vor jedem Release die eigene Implementierung gegen die Spezifikation prüfen.
+
+Die Datei lässt sich lokal validieren:
+
+```bash
+npx @redocly/cli lint openapi/opengewerk-kanzlei-api.yaml
+```
+
+Derselbe Aufruf läuft in der CI dieses Repositories bei jedem Push und jedem Pull Request.
+
+## Konventionen
+
+- Alle Beträge sind Integer in Cent, nie Gleitkommazahlen.
+- Alle Datums- und Zeitangaben folgen ISO 8601.
+- Steuerschlüssel folgen der DATEV-Konvention, damit der spätere Export verlustfrei bleibt.
+- Listen sind paginiert, unterstützen ETag und `If-None-Match` für effizienten Sync.
+- Schreibende Aufrufe verlangen einen Idempotenz-Key.
+
+## Mitmachen
+
+- Fragen und Vorschläge zum Vertrag gehören in die [Discussions](https://github.com/opengewerk/opengewerk-api-spec/discussions).
+- Konkrete Fehler und Wünsche laufen über die [Issue-Vorlagen](https://github.com/opengewerk/opengewerk-api-spec/issues/new/choose).
+- Die Beitragsregeln stehen in [CONTRIBUTING.md](https://github.com/opengewerk/.github/blob/main/CONTRIBUTING.md), der Verhaltenskodex in [CODE_OF_CONDUCT.md](https://github.com/opengewerk/.github/blob/main/CODE_OF_CONDUCT.md).
+
+## Lizenz
+
+[Apache License 2.0](LICENSE). Bewusst permissiv: auch ein proprietäres System darf diesen Vertrag implementieren, denn ein Schnittstellenstandard nützt nur, wenn ihn alle umsetzen dürfen.
