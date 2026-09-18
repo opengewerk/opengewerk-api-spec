@@ -50,6 +50,7 @@ Zwei Seiten sollen sich testen lassen:
 - Jedes Schema wird von der OpenAPI-Datei auch wirklich referenziert, es liegt keine Leiche im Ordner
 - Jede Operation verlangt nur Scopes, die im Sicherheitsschema deklariert sind
 - Jede Operation beantwortet fehlende Anmeldung mit 401 und, sofern sie einen Scope verlangt, fehlenden Scope mit 403
+- Jede Operation beschreibt, womit sie eine nicht auswertbare Anfrage beantwortet: 400
 - Jede schreibende Operation verlangt einen `Idempotency-Key`
 - Jede Liste liefert ein `ETag` und beantwortet `If-None-Match` mit 304
 - Die Zuordnung Endpunkt zu Scope stimmt mit `docs/scopes.md` überein, in beide Richtungen
@@ -61,6 +62,7 @@ Zwei Seiten sollen sich testen lassen:
 
 - Jeder GET-Endpunkt des Vertrags ist vorhanden, antwortet also weder mit 404 noch mit 5xx
 - Ein Aufruf ohne Token wird mit HTTP 401 beantwortet
+- Fehlt ein Pflichtparameter, kommt HTTP 400 mit einem Fehlerobjekt zurück
 - Ein fehlender Scope wird mit HTTP 403 beantwortet und benennt den fehlenden Scope, nicht mit 404
 - Jede Liste hält die Schemas aus [`../schemas/`](../schemas/) ein, Pflichtfelder und Datentypen inbegriffen
 - ETag: `If-None-Match` mit unverändertem Stand liefert HTTP 304
@@ -81,6 +83,5 @@ Die Tests laufen gegen eine laufende Instanz, deren Basis-URL und Token von auß
 
 - **Die Nutzlast des Betriebsprüfungs-Exports**, sie ist noch nicht festgelegt.
 - **Der Verbindungsaufbau** über den Einladungscode. Er läuft heute außerhalb der Spezifikation, nur die Adresse für die Token-Ausgabe ist reserviert.
-- **Die Antwort auf eine fehlerhafte Anfrage.** Der Vertrag kennt Pflichtparameter, sagt aber an keiner Operation, womit eine Instanz antwortet, wenn einer fehlt: weder 400 noch 422 sind dort beschrieben. Die Attrappe antwortet mit HTTP 400 und einem `Error`-Objekt. Solange der Vertrag dazu schweigt, kann die Suite das nicht prüfen.
 
 Verbindlich ist und bleibt die OpenAPI-Definition unter [`../openapi/opengewerk-kanzlei-api.yaml`](../openapi/opengewerk-kanzlei-api.yaml). Diese Suite prüft, ob eine Implementierung ihr folgt, sie ersetzt sie nicht.

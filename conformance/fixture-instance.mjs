@@ -405,10 +405,20 @@ async function answer(request) {
   for (const parameter of parametersOf(match.operation)) {
     if (!parameter.required) continue
     if (parameter.in === 'query' && !url.searchParams.has(parameter.name)) {
-      return { status: 400, body: fail('parameter_missing', `the query parameter ${parameter.name} is required`) }
+      return {
+        status: 400,
+        body: fail('parameter_missing', `the query parameter ${parameter.name} is required`, {
+          parameter: parameter.name,
+        }),
+      }
     }
     if (parameter.in === 'header' && !request.headers[parameter.name.toLowerCase()]) {
-      return { status: 400, body: fail('header_missing', `the header ${parameter.name} is required`) }
+      return {
+        status: 400,
+        body: fail('header_missing', `the header ${parameter.name} is required`, {
+          parameter: parameter.name,
+        }),
+      }
     }
   }
 

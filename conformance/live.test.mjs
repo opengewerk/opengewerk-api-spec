@@ -83,6 +83,17 @@ test('every GET endpoint of the contract exists', { skip }, async () => {
   }
 })
 
+test('a missing required parameter is answered with 400', { skip }, async () => {
+  const affected = operations().filter(({ method, operation }) =>
+    method === 'get' && parametersOf(operation).some((p) => p.in === 'query' && p.required))
+  assert.ok(affected.length > 0, 'the contract has no required query parameter left to check')
+  for (const { path } of affected) {
+    const { status, payload } = await call(path)
+    assert.equal(status, 400, `GET ${path} without its required parameters answers ${status}`)
+    assert.ok(payload?.code, `GET ${path}: the error object carries no code`)
+  }
+})
+
 test('a request without a token is answered with 401', { skip }, async () => {
   const { status } = await call('/periods', { bearer: undefined })
   assert.equal(status, 401)

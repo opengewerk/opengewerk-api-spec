@@ -85,6 +85,13 @@ test('every operation answers missing authentication and missing scope', () => {
   }
 })
 
+test('every operation says how it answers a malformed request', () => {
+  for (const { path, method, operation } of operations()) {
+    const codes = Object.keys(operation.responses)
+    assert.ok(codes.includes('400'), `${method.toUpperCase()} ${path}: 400 missing`)
+  }
+})
+
 test('writing operations require an Idempotency-Key', () => {
   for (const { path, method, operation } of operations()) {
     if (method === 'get') continue
