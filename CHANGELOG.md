@@ -26,6 +26,9 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Alle Abhängigkeiten auf die neuestmögliche Version: `js-yaml` von 4 auf 5, dadurch
+  `import { load } from 'js-yaml'` statt der weggefallenen Standardausfuhr. Node in der
+  CI von 22 auf 24, passend zur lokalen Entwicklung
 - Die CI prüft die OpenAPI-Datei mit der im Projekt festgelegten redocly-Version statt
   mit `npx @redocly/cli@latest`. Eine Prüfung, deren Werkzeug sich ohne Commit ändern
   kann, meldet irgendwann etwas, das niemand verursacht hat
