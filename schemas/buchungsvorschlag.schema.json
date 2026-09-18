@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/buchungsvorschlag.schema.json",
+  "title": "Buchungsvorschlag",
+  "description": "Ein Kontierungsvorschlag der Kanzlei. Ein Vorschlag bucht nichts: Der Mandant gibt ihn frei, erst dann entstehen Journalzeilen. Nur mit dem Scope write:closing darf die Kanzlei das Freigeben überspringen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "status",
+    "lines",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung des Vorschlags im Mandantensystem."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "accepted",
+        "rejected",
+        "withdrawn"
+      ],
+      "description": "Stand des Vorschlags."
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Beleg oder offener Posten, auf den sich der Vorschlag bezieht, sofern es einen gibt.",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "document",
+            "open_item"
+          ],
+          "description": "Art des Bezugs."
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Kennung des bezogenen Gegenstands."
+        }
+      }
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Vorgeschlagene Buchungssätze.",
+      "items": {
+        "$ref": "#/$defs/Zeile"
+      }
+    },
+    "comment": {
+      "type": "string",
+      "description": "Begründung der Kanzlei."
+    },
+    "post_directly": {
+      "type": "boolean",
+      "default": false,
+      "description": "Direkt buchen statt vorschlagen. Nur mit dem Scope write:closing zulässig, sonst antwortet der Mandant mit HTTP 403 und nennt den fehlenden Scope."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Einreichung."
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Kennung des Kanzlei-Mitarbeiters aus dem Hub."
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Entscheidung des Mandanten."
+    },
+    "decided_by": {
+      "type": "string",
+      "description": "Kennung des entscheidenden Mitarbeiters im Mandantensystem."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Begründung, falls abgelehnt."
+    },
+    "resulting_entry_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Journalzeilen, die aus der Freigabe entstanden sind."
+    }
+  },
+  "$defs": {
+    "Zeile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Ein vorgeschlagener Buchungssatz.",
+      "required": [
+        "debit_account",
+        "credit_account",
+        "amount_cents",
+        "currency"
+      ],
+      "properties": {
+        "debit_account": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Kontonummer im Soll."
+        },
+        "credit_account": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Kontonummer im Haben."
+        },
+        "amount_cents": {
+          "type": "integer",
+          "description": "Betrag in Cent, immer positiv."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "default": "EUR",
+          "description": "Währung nach ISO 4217. Vorgabe EUR."
+        },
+        "tax_key": {
+          "type": "string",
+          "description": "Steuerschlüssel nach DATEV-Konvention."
+        },
+        "text": {
+          "type": "string",
+          "description": "Buchungstext."
+        },
+        "booking_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Vorgeschlagenes Buchungsdatum."
+        },
+        "cost_center": {
+          "type": "string",
+          "description": "Kostenstelle."
+        }
+      }
+    },
+    "Neu": {
+      "title": "Neuer Buchungsvorschlag",
+      "description": "Nutzlast für POST /proposals. Kennung, Status und Zeitpunkt vergibt das Mandantensystem.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lines"
+      ],
+      "properties": {
+        "reference": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Beleg oder offener Posten, auf den sich der Vorschlag bezieht.",
+          "required": [
+            "type",
+            "id"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "document",
+                "open_item"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Zeile"
+          },
+          "description": "Vorgeschlagene Buchungssätze."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Begründung der Kanzlei."
+        },
+        "post_directly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Direkt buchen statt vorschlagen. Verlangt zusätzlich den Scope write:closing."
+        }
+      }
+    }
+  }
+}

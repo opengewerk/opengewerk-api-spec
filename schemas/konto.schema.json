@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/konto.schema.json",
+  "title": "Konto",
+  "description": "Ein Konto aus dem Kontenplan des Mandanten.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "number",
+    "name",
+    "chart_of_accounts"
+  ],
+  "properties": {
+    "number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kontonummer."
+    },
+    "name": {
+      "type": "string",
+      "description": "Bezeichnung des Kontos."
+    },
+    "chart_of_accounts": {
+      "type": "string",
+      "description": "Verwendeter Kontenrahmen, etwa SKR03 oder SKR04."
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "asset",
+        "liability",
+        "equity",
+        "revenue",
+        "expense",
+        "receivable",
+        "payable",
+        "tax",
+        "other"
+      ],
+      "description": "Art des Kontos."
+    },
+    "is_automatic_account": {
+      "type": "boolean",
+      "description": "Automatikkonto, das den Steuerschlüssel selbst mitbringt."
+    },
+    "default_tax_key": {
+      "type": "string",
+      "description": "Voreingestellter Steuerschlüssel nach DATEV-Konvention."
+    },
+    "is_active": {
+      "type": "boolean",
+      "description": "Ob das Konto bebucht werden darf."
+    }
+  }
+}

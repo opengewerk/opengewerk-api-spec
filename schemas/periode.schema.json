@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/periode.schema.json",
+  "title": "Periode",
+  "description": "Eine Buchungsperiode mit Festschreibungsstatus und den Werten der Umsatzsteuer-Voranmeldung.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identifier",
+    "from_date",
+    "to_date",
+    "is_locked"
+  ],
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "description": "Bezeichnung der Periode, etwa 2027-03 für den Monat oder 2027-Q1 für das Quartal."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "month",
+        "quarter",
+        "year"
+      ],
+      "description": "Art der Periode."
+    },
+    "from_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Erster Tag, einschließlich."
+    },
+    "to_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Letzter Tag, einschließlich."
+    },
+    "is_locked": {
+      "type": "boolean",
+      "description": "Festgeschrieben. Danach sind Buchungen dieser Periode unveränderlich."
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Festschreibung."
+    },
+    "vat_return": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Werte der Umsatzsteuer-Voranmeldung. Sie sind eine Auswertung des Mandanten und keine Abgabe: Die Übermittlung an ELSTER erfolgt außerhalb von OpenGewerk.",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "ready",
+            "submitted"
+          ],
+          "description": "Stand der Voranmeldung. `ready` bedeutet vom Mandanten freigegeben, nicht abgegeben."
+        },
+        "is_preview": {
+          "type": "boolean",
+          "description": "Solange die Buchhaltung nicht durch einen Steuerberater geprüft ist, tragen die Auswertungen das Kennzeichen Vorschau und sind nicht abgabefertig."
+        },
+        "net_sales_cents": {
+          "type": "integer",
+          "description": "Summe der steuerpflichtigen Umsätze in Cent."
+        },
+        "output_tax_cents": {
+          "type": "integer",
+          "description": "Umsatzsteuer in Cent."
+        },
+        "input_tax_cents": {
+          "type": "integer",
+          "description": "Vorsteuer in Cent."
+        },
+        "payable_cents": {
+          "type": "integer",
+          "description": "Zahllast in Cent. Negativ bedeutet Erstattung."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "default": "EUR",
+          "description": "Währung nach ISO 4217. Vorgabe EUR."
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Zeitpunkt, zu dem die Abgabe außerhalb des Systems erfolgt ist, sofern der Mandant ihn vermerkt hat."
+        },
+        "permanent_extension": {
+          "type": "boolean",
+          "description": "Dauerfristverlängerung liegt vor."
+        }
+      }
+    }
+  }
+}

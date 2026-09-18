@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/protokolleintrag.schema.json",
+  "title": "Protokolleintrag",
+  "description": "Ein protokollierter Zugriff der Kanzlei auf die Mandanten-Instanz. Jeder Aufruf wird protokolliert, auch ein abgelehnter, und beide Seiten können das Protokoll einsehen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "occurred_at",
+    "method",
+    "path",
+    "status_code"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung des Eintrags."
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt des Zugriffs."
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "description": "HTTP-Methode."
+    },
+    "path": {
+      "type": "string",
+      "description": "Angefragter Pfad ohne Hostnamen."
+    },
+    "status_code": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599,
+      "description": "HTTP-Status der Antwort."
+    },
+    "scope": {
+      "type": "string",
+      "description": "Scope, mit dem der Zugriff geprüft wurde."
+    },
+    "missing_scope": {
+      "type": "string",
+      "description": "Fehlender Scope, falls der Zugriff mit HTTP 403 abgelehnt wurde."
+    },
+    "resource_type": {
+      "type": "string",
+      "description": "Art der betroffenen Ressource, etwa journal oder document."
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "Kennung der betroffenen Ressource, sofern der Zugriff genau eine betraf."
+    },
+    "firm_name": {
+      "type": "string",
+      "description": "Name der zugreifenden Kanzlei, wie er beim Verbindungsaufbau hinterlegt wurde."
+    },
+    "user_reference": {
+      "type": "string",
+      "description": "Kennung des handelnden Kanzlei-Mitarbeiters aus dem Hub. Ein Name wird nicht übertragen, der Hub löst die Kennung selbst auf."
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Kennung der Anfrage, dieselbe wie im Protokoll des Hubs. Über sie lassen sich beide Protokolle gegeneinander halten."
+    }
+  }
+}

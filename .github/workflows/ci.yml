@@ -61,6 +61,25 @@ jobs:
           print("Alle Textdateien sind UTF-8 ohne BOM und benutzen LF.")
           PYTHON
 
+  konformitaet:
+    name: Konformitätstests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Statische Prüfungen ausführen
+        run: npm run test:static
+
   openapi:
     name: OpenAPI-Definition validieren
     runs-on: ubuntu-latest

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/kontenrahmen-profil.schema.json",
+  "title": "Kontenrahmen-Profil",
+  "description": "Das Kontierungsprofil der Kanzlei: Kontenrahmen, Automatikkonten und Steuerschlüssel. Der Mandant sieht eine Vorschau, bevor er es übernimmt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "chart_of_accounts",
+    "valid_from"
+  ],
+  "properties": {
+    "chart_of_accounts": {
+      "type": "string",
+      "description": "Kontenrahmen, etwa SKR03 oder SKR04."
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date",
+      "description": "Erster Tag, ab dem das Profil gilt. Zurückliegende festgeschriebene Buchungen bleiben unberührt."
+    },
+    "profile_version": {
+      "type": "string",
+      "description": "Versionsbezeichnung der Kanzlei für dieses Profil."
+    },
+    "fiscal_year_start_month": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "Monat, in dem das Geschäftsjahr beginnt. Vorgabe 1."
+    },
+    "accounts": {
+      "type": "array",
+      "description": "Konten, die angelegt oder geändert werden sollen.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "number",
+          "name"
+        ],
+        "properties": {
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Kontonummer."
+          },
+          "name": {
+            "type": "string",
+            "description": "Bezeichnung."
+          },
+          "is_automatic_account": {
+            "type": "boolean",
+            "description": "Automatikkonto."
+          },
+          "default_tax_key": {
+            "type": "string",
+            "description": "Voreingestellter Steuerschlüssel."
+          }
+        }
+      }
+    },
+    "tax_keys": {
+      "type": "array",
+      "description": "Steuerschlüssel nach DATEV-Konvention, die das Profil verwendet.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "description"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Schlüssel."
+          },
+          "description": {
+            "type": "string",
+            "description": "Bedeutung im Klartext."
+          },
+          "rate_permille": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Steuersatz in Promille, damit auch krumme Sätze ohne Gleitkomma darstellbar sind. 19 Prozent sind 190."
+          }
+        }
+      }
+    },
+    "posting_rules": {
+      "type": "array",
+      "description": "Kontierungsregeln der Kanzlei, etwa welche Erlösart auf welches Konto gebucht wird.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "match",
+          "account_number"
+        ],
+        "properties": {
+          "match": {
+            "type": "string",
+            "description": "Merkmal, auf das die Regel zutrifft, etwa eine Erlösart oder ein Belegtyp."
+          },
+          "account_number": {
+            "type": "string",
+            "description": "Zu verwendendes Konto."
+          },
+          "tax_key": {
+            "type": "string",
+            "description": "Zu verwendender Steuerschlüssel."
+          }
+        }
+      }
+    }
+  }
+}

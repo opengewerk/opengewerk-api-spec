@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/beleg.schema.json",
+  "title": "Beleg",
+  "description": "Ein Beleg des Mandanten mit seinen Dateien. Das Belegbild und ein etwaiges E-Rechnungs-XML werden über die aufgeführten Dateien geladen, nicht als Inhalt dieser Antwort.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "document_type",
+    "document_date",
+    "files"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung des Belegs im Mandantensystem."
+    },
+    "document_number": {
+      "type": "string",
+      "description": "Belegnummer aus dem Nummernkreis des Mandanten."
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "outgoing_invoice",
+        "incoming_invoice",
+        "credit_note",
+        "receipt",
+        "bank_statement",
+        "other"
+      ],
+      "description": "Art des Belegs."
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Belegdatum."
+    },
+    "partner_name": {
+      "type": "string",
+      "description": "Name des Geschäftspartners."
+    },
+    "total_gross_cents": {
+      "type": "integer",
+      "description": "Bruttobetrag in Cent."
+    },
+    "total_net_cents": {
+      "type": "integer",
+      "description": "Nettobetrag in Cent."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "default": "EUR",
+      "description": "Währung nach ISO 4217. Vorgabe EUR."
+    },
+    "is_locked": {
+      "type": "boolean",
+      "description": "Festgeschrieben nach GoBD. Die Dateien eines festgeschriebenen Belegs sind bis zum Ende der Aufbewahrungsfrist unveränderlich."
+    },
+    "journal_entry_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Journalzeilen, die zu diesem Beleg gehören."
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Dateien des Belegs. Mindestens eine, in der Regel das Belegbild.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "content_type",
+          "sha256",
+          "download_url"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "image",
+              "pdf",
+              "einvoice_xml",
+              "attachment"
+            ],
+            "description": "Rolle der Datei. `einvoice_xml` ist das strukturierte XML einer E-Rechnung."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "Medientyp nach IANA."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Prüfsumme des Inhalts. Der Dateispeicher ist inhaltsadressiert, dieselbe Datei hat immer denselben Wert."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Größe in Byte."
+          },
+          "download_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Adresse zum Abruf. Verlangt denselben Token und denselben Scope wie dieser Endpunkt."
+          },
+          "einvoice_format": {
+            "type": "string",
+            "enum": [
+              "xrechnung",
+              "zugferd"
+            ],
+            "description": "Format der E-Rechnung, nur bei der Rolle `einvoice_xml`."
+          }
+        }
+      }
+    }
+  }
+}
