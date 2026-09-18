@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/journalzeile.schema.json",
+  "title": "Journalzeile",
+  "description": "Ein Buchungssatz im Journal des Mandanten. Festgeschriebene Zeilen werden nie geändert oder gelöscht, eine Korrektur entsteht als Gegenbuchung.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "booking_date",
+    "debit_account",
+    "credit_account",
+    "amount_cents",
+    "currency",
+    "is_locked"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung der Buchungszeile im Mandantensystem."
+    },
+    "entry_number": {
+      "type": "string",
+      "description": "Fortlaufende Buchungsnummer aus dem Nummernkreis des Mandanten. Fehlt, solange die Buchung nicht festgeschrieben ist."
+    },
+    "booking_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Buchungsdatum."
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Datum des zugrunde liegenden Belegs."
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$",
+      "description": "Buchungsperiode im Format JJJJ-MM."
+    },
+    "debit_account": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kontonummer im Soll."
+    },
+    "credit_account": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kontonummer im Haben."
+    },
+    "amount_cents": {
+      "type": "integer",
+      "description": "Buchungsbetrag in Cent, immer positiv. Die Richtung ergibt sich aus Soll und Haben."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "default": "EUR",
+      "description": "Währung nach ISO 4217. Vorgabe EUR."
+    },
+    "tax_key": {
+      "type": "string",
+      "description": "Steuerschlüssel nach DATEV-Konvention, damit der spätere Export verlustfrei bleibt."
+    },
+    "tax_amount_cents": {
+      "type": "integer",
+      "description": "Enthaltener Steuerbetrag in Cent, sofern der Steuerschlüssel einen ausweist."
+    },
+    "text": {
+      "type": "string",
+      "description": "Buchungstext."
+    },
+    "document_id": {
+      "type": "string",
+      "description": "Kennung des Belegs, abrufbar über GET /documents/{id}."
+    },
+    "document_number": {
+      "type": "string",
+      "description": "Belegnummer, etwa die Rechnungsnummer."
+    },
+    "cost_center": {
+      "type": "string",
+      "description": "Kostenstelle, falls der Mandant damit arbeitet."
+    },
+    "is_locked": {
+      "type": "boolean",
+      "description": "Festgeschrieben nach GoBD. Eine festgeschriebene Zeile ist unveränderlich."
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Festschreibung."
+    },
+    "reverses_entry_id": {
+      "type": "string",
+      "description": "Kennung der Zeile, die diese Buchung storniert."
+    },
+    "reversed_by_entry_id": {
+      "type": "string",
+      "description": "Kennung der Zeile, die diese Buchung storniert hat."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Erfassung."
+    },
+    "source": {
+      "type": "string",
+      "description": "Herkunft der Buchung, etwa Rechnungsausgang, Bank oder manuelle Erfassung."
+    }
+  }
+}

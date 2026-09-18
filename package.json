@@ -1,0 +1,23 @@
+{
+  "name": "opengewerk-kanzlei-api-spec",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Interface contract between an OpenGewerk instance and the Kanzlei hub, including conformance tests",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"conformance/*.test.mjs\"",
+    "test:static": "node --test conformance/static.test.mjs",
+    "test:live": "node --test conformance/live.test.mjs",
+    "lint:openapi": "redocly lint openapi/opengewerk-kanzlei-api.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.25.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "js-yaml": "^4.1.0"
+  }
+}

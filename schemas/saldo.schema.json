@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/saldo.schema.json",
+  "title": "Saldo",
+  "description": "Summen und Saldo eines Kontos zu einem Stichtag.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "account_number",
+    "as_of_date",
+    "balance_cents",
+    "currency"
+  ],
+  "properties": {
+    "account_number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kontonummer."
+    },
+    "account_name": {
+      "type": "string",
+      "description": "Bezeichnung des Kontos zum Stichtag."
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Stichtag, einschließlich."
+    },
+    "opening_balance_cents": {
+      "type": "integer",
+      "description": "Eröffnungssaldo in Cent, vorzeichenbehaftet."
+    },
+    "debit_total_cents": {
+      "type": "integer",
+      "description": "Summe der Sollbuchungen in Cent."
+    },
+    "credit_total_cents": {
+      "type": "integer",
+      "description": "Summe der Habenbuchungen in Cent."
+    },
+    "balance_cents": {
+      "type": "integer",
+      "description": "Saldo in Cent, vorzeichenbehaftet. Positiv bedeutet Sollsaldo."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "default": "EUR",
+      "description": "Währung nach ISO 4217. Vorgabe EUR."
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/offener-posten.schema.json",
+  "title": "Offener Posten",
+  "description": "Eine noch nicht ausgeglichene Forderung oder Verbindlichkeit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "document_number",
+    "document_date",
+    "open_amount_cents",
+    "currency"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung des offenen Postens."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "receivable",
+        "payable"
+      ],
+      "description": "Forderung oder Verbindlichkeit."
+    },
+    "account_number": {
+      "type": "string",
+      "description": "Personen- oder Sachkonto."
+    },
+    "partner_number": {
+      "type": "string",
+      "description": "Debitoren- oder Kreditorennummer."
+    },
+    "partner_name": {
+      "type": "string",
+      "description": "Name des Geschäftspartners."
+    },
+    "document_number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Belegnummer, etwa die Rechnungsnummer."
+    },
+    "document_id": {
+      "type": "string",
+      "description": "Kennung des Belegs, abrufbar über GET /documents/{id}."
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Belegdatum."
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fälligkeitsdatum."
+    },
+    "amount_cents": {
+      "type": "integer",
+      "description": "Ursprünglicher Betrag in Cent."
+    },
+    "open_amount_cents": {
+      "type": "integer",
+      "description": "Noch offener Betrag in Cent."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "default": "EUR",
+      "description": "Währung nach ISO 4217. Vorgabe EUR."
+    },
+    "cash_discount_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Letzter Tag für den Skontoabzug."
+    },
+    "cash_discount_cents": {
+      "type": "integer",
+      "description": "Möglicher Skontobetrag in Cent."
+    },
+    "dunning_level": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Erreichte Mahnstufe, 0 bedeutet nicht gemahnt."
+    },
+    "retention_until": {
+      "type": "string",
+      "format": "date",
+      "description": "Ende eines Sicherheitseinbehalts, falls vereinbart."
+    }
+  }
+}

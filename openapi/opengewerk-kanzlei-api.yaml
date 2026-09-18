@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.2.0
+  version: 0.3.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -11,9 +11,11 @@ info:
     jeder Zugriff ist durch Scopes begrenzt, die der Mandant einzeln vergibt und
     jederzeit widerrufen kann.
 
-    Die Endpunkte sind in dieser Fassung Platzhalter. Pfade, Methoden und Scopes
-    stehen fest, die Nutzlasten werden mit den JSON-Schemas unter `schemas/`
-    nachgezogen.
+    Pfade, Methoden, Scopes und Nutzlasten stehen fest. Die Nutzlasten sind als
+    JSON-Schemas unter `schemas/` abgelegt und von hier aus referenziert, damit
+    dieselben Schemas auch in den Webhook-Ereignissen und in den
+    Konformitätstests gelten. Ohne eigene Nutzlast ist nur noch der Export für
+    die Betriebsprüfung.
   license:
     name: Apache-2.0
     identifier: Apache-2.0
@@ -72,9 +74,32 @@ paths:
         den Werten der Umsatzsteuer-Voranmeldung. Benötigt den Scope `read:periods`.
       security:
         - kanzleiToken: [read:periods]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Jahr"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Perioden des Mandanten
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/periode.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -91,9 +116,33 @@ paths:
         Benötigt den Scope `read:ledger`.
       security:
         - kanzleiToken: [read:ledger]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Von"
+        - $ref: "#/components/parameters/Bis"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Journalzeilen des angefragten Zeitraums
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/journalzeile.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -109,9 +158,31 @@ paths:
         Automatikkonten-Kennzeichen. Benötigt den Scope `read:ledger`.
       security:
         - kanzleiToken: [read:ledger]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Kontenplan des Mandanten
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/konto.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -127,9 +198,32 @@ paths:
         Benötigt den Scope `read:ledger`.
       security:
         - kanzleiToken: [read:ledger]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Stichtag"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Salden je Konto zum Stichtag
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/saldo.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -145,9 +239,31 @@ paths:
         Benötigt den Scope `read:ledger`.
       security:
         - kanzleiToken: [read:ledger]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Offene Posten des Mandanten
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/offener-posten.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -167,7 +283,16 @@ paths:
         - kanzleiToken: [read:documents]
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Beleg mit seinen Dateien
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/beleg.schema.json"
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -185,13 +310,27 @@ paths:
         Rückfragen-Postfach erscheint. Benötigt den Scope `write:comments`.
       security:
         - kanzleiToken: [write:comments]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/rueckfrage.schema.json#/$defs/Neu"
       responses:
-        "200":
-          $ref: "#/components/responses/Erfolg"
+        "201":
+          description: Rückfrage angelegt
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/rueckfrage.schema.json"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
           $ref: "#/components/responses/ScopeFehlt"
+        "422":
+          $ref: "#/components/responses/NichtVerarbeitbar"
 
   /proposals:
     post:
@@ -204,13 +343,27 @@ paths:
         verlangt zusätzlich den Scope `write:closing`.
       security:
         - kanzleiToken: [write:proposals]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/buchungsvorschlag.schema.json#/$defs/Neu"
       responses:
-        "200":
-          $ref: "#/components/responses/Erfolg"
+        "201":
+          description: Vorschlag eingereicht
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/buchungsvorschlag.schema.json"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
           $ref: "#/components/responses/ScopeFehlt"
+        "422":
+          $ref: "#/components/responses/NichtVerarbeitbar"
 
   /coa-profile:
     put:
@@ -223,13 +376,27 @@ paths:
         Benötigt den Scope `write:coa`.
       security:
         - kanzleiToken: [write:coa]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/kontenrahmen-profil.schema.json"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Profil übernommen oder zur Vorschau hinterlegt
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/kontenrahmen-profil.schema.json"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
           $ref: "#/components/responses/ScopeFehlt"
+        "422":
+          $ref: "#/components/responses/NichtVerarbeitbar"
 
   /audit-export:
     post:
@@ -242,9 +409,17 @@ paths:
         Benötigt den Scope `export:audit`.
       security:
         - kanzleiToken: [export:audit]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       responses:
-        "200":
-          $ref: "#/components/responses/Erfolg"
+        "202":
+          description: |
+            Export angestoßen. Die Nutzlast dieses Endpunkts ist noch nicht
+            festgelegt, sie gehört nicht zu den zehn Schemas unter `schemas/`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Platzhalter"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
         "403":
@@ -262,9 +437,31 @@ paths:
         zusätzlichen Scope.
       security:
         - kanzleiToken: []
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          $ref: "#/components/responses/Erfolg"
+          description: Protokollierte Zugriffe der eigenen Kanzlei
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/protokolleintrag.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NichtModifiziert"
         "401":
           $ref: "#/components/responses/NichtAuthentifiziert"
 
@@ -310,6 +507,82 @@ components:
       schema:
         type: string
 
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Cursor der gewünschten Seite, aus dem Feld next_cursor der vorigen Antwort
+      schema:
+        type: string
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Höchstzahl der Einträge je Seite
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+
+    Von:
+      name: from
+      in: query
+      required: true
+      description: Erster Tag des Zeitraums, einschließlich
+      schema:
+        type: string
+        format: date
+
+    Bis:
+      name: to
+      in: query
+      required: true
+      description: Letzter Tag des Zeitraums, einschließlich
+      schema:
+        type: string
+        format: date
+
+    Stichtag:
+      name: as_of
+      in: query
+      required: true
+      description: Stichtag der Auswertung, einschließlich
+      schema:
+        type: string
+        format: date
+
+    Jahr:
+      name: year
+      in: query
+      required: false
+      description: Beschränkt die Antwort auf ein Kalenderjahr
+      schema:
+        type: integer
+        minimum: 2000
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Schlüssel, mit dem ein wiederholter Aufruf erkannt wird. Derselbe
+        Schlüssel erzeugt keinen zweiten Datensatz, sondern liefert das Ergebnis
+        des ersten Aufrufs.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+
+  headers:
+    ETag:
+      description: |
+        Kennzeichen des ausgelieferten Standes. Der Hub sendet es beim nächsten
+        Abruf als If-None-Match und bekommt bei unverändertem Stand HTTP 304.
+      schema:
+        type: string
+
   schemas:
     Platzhalter:
       title: Platzhalter
@@ -335,12 +608,15 @@ components:
           description: Der fehlende Scope, falls der Fehler daran liegt
 
   responses:
-    Erfolg:
-      description: Anfrage erfolgreich
+    NichtModifiziert:
+      description: Der Stand hat sich seit dem mitgesendeten ETag nicht geändert
+
+    NichtVerarbeitbar:
+      description: Die Anfrage ist wohlgeformt, aber fachlich nicht verarbeitbar
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Platzhalter"
+            $ref: "#/components/schemas/Fehler"
 
     NichtAuthentifiziert:
       description: Kein oder ungültiger Token

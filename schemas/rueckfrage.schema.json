@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/rueckfrage.schema.json",
+  "title": "Rückfrage",
+  "description": "Eine Rückfrage der Kanzlei zu einem Beleg, einer Buchung oder einer Periode. Eine Rückfrage verändert nichts am Datenbestand, sie ist ein Postfach.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "status",
+    "subject",
+    "body",
+    "reference",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kennung der Rückfrage im Mandantensystem."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "answered",
+        "closed"
+      ],
+      "description": "Stand der Rückfrage."
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Betreff."
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Text der Rückfrage."
+    },
+    "reference": {
+      "$ref": "#/$defs/Bezug"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt der Erstellung."
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Kennung des Kanzlei-Mitarbeiters aus dem Hub."
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Datum, bis zu dem die Kanzlei eine Antwort braucht."
+    },
+    "answers": {
+      "type": "array",
+      "description": "Antworten des Mandanten, älteste zuerst.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "body",
+          "created_at"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text der Antwort."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Zeitpunkt der Antwort."
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Kennung des antwortenden Mitarbeiters im Mandantensystem."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Bezug": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Gegenstand der Rückfrage.",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "document",
+            "journal_entry",
+            "open_item",
+            "period"
+          ],
+          "description": "Art des Bezugs."
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Kennung des bezogenen Gegenstands."
+        }
+      }
+    },
+    "Neu": {
+      "title": "Neue Rückfrage",
+      "description": "Nutzlast für POST /inquiries. Kennung, Status und Zeitpunkt vergibt das Mandantensystem.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "body",
+        "reference"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Betreff."
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Text der Rückfrage."
+        },
+        "reference": {
+          "$ref": "#/$defs/Bezug"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Datum, bis zu dem die Kanzlei eine Antwort braucht."
+        }
+      }
+    }
+  }
+}
