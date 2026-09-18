@@ -4,7 +4,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import yaml from 'js-yaml'
+import { load as loadYaml } from 'js-yaml'
 import Ajv2020 from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 
@@ -14,9 +14,9 @@ export const root = join(here, '..')
 export const openapiPath = join(root, 'openapi', 'opengewerk-kanzlei-api.yaml')
 export const schemaDir = join(root, 'schemas')
 
-// js-yaml 4 resolves the core schema only, so load() does not construct
-// arbitrary types. The file is our own contract, not external input.
-export const contract = yaml.load(readFileSync(openapiPath, 'utf8'))
+// js-yaml resolves the core schema only, so load() does not construct arbitrary
+// types. The file is our own contract, not external input.
+export const contract = loadYaml(readFileSync(openapiPath, 'utf8'))
 
 export const schemaFiles = readdirSync(schemaDir)
   .filter((name) => name.endsWith('.schema.json'))

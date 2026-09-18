@@ -1,0 +1,43 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Montags früh, damit ein Fund am Wochenanfang auf dem Tisch liegt und nicht
+    # erst beim nächsten Push auffällt
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyse (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # actions prüft die Workflow-Dateien selbst, javascript-typescript die
+        # Konformitätstests unter conformance/
+        language: [actions, javascript-typescript]
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: CodeQL vorbereiten
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: Analyse ausführen
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
