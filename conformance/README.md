@@ -1,18 +1,40 @@
 # Konformitätstests
 
-Die Testsuite, mit der eine Implementierung prüft, ob sie den Vertrag wirklich einhält. Sie zerfällt in zwei Teile:
+Die Testsuite, mit der eine Implementierung prüft, ob sie den Vertrag wirklich einhält. Sie besteht aus zwei Prüfteilen und einer Attrappe, gegen die der Live-Teil laufen kann:
 
 - **`static.test.mjs`** braucht keine laufende Instanz und prüft den Vertrag gegen sich selbst und gegen die Dokumentation. Diese Prüfungen laufen in der CI bei jedem Push.
 - **`live.test.mjs`** prüft eine laufende Instanz. Ohne `OPENGEWERK_BASE_URL` und `OPENGEWERK_TOKEN` werden diese Tests übersprungen, damit die CI grün bleibt, solange es keine Implementierung gibt.
+- **`fixture-instance.mjs`** ist eine Steh-Instanz, die den Vertrag beantwortet. Sie gibt dem Live-Teil etwas, gegen das er laufen kann, solange niemand eine echte Instanz betreibt. In der CI läuft der Live-Teil gegen diese Attrappe.
 
 ```bash
 npm install
 npm test                 # beides, live wird übersprungen
 npm run test:static      # nur die statischen Prüfungen
+npm run test:fixture     # der Live-Teil gegen die mitgelieferte Attrappe
 OPENGEWERK_BASE_URL=https://betrieb.example/api/kanzlei/v1 OPENGEWERK_TOKEN=...   npm run test:live
 ```
 
 Für die Prüfung auf einen fehlenden Scope braucht es zusätzlich `OPENGEWERK_TOKEN_WITHOUT_SCOPES`, einen Token ohne Leserechte. Ohne ihn wird genau dieser Test übersprungen, die anderen laufen.
+
+## Die Attrappe
+
+`fixture-instance.mjs` beantwortet den Vertrag, damit der Live-Teil geprüft werden kann,
+bevor es eine Implementierung gibt. Alles, was sich aus dem Vertrag ableiten lässt, leitet
+sie daraus ab: welche Endpunkte es gibt, welche Scopes sie verlangen, welche Parameter
+Pflicht sind und wie die Versionsaushandlung antwortet. Fest steht nur die Nutzlast, und
+jede Nutzlast wird vor dem Ausliefern gegen ihr Schema geprüft. Passt sie nicht, antwortet
+die Attrappe mit einem Fehler statt mit Daten; damit kann sie nicht unbemerkt von
+`../schemas/` abdriften.
+
+Ein Token trägt seine Scopes im Token selbst, etwa `fixture.read:ledger,write:comments`.
+So kann ein Aufrufer sich jede Rechtekombination geben, ohne dass es einen Token-Endpunkt
+gibt; der Verbindungsaufbau ist im Vertrag bewusst offen. Einzeln starten lässt sich die
+Attrappe mit `npm run fixture`, sie druckt dann die drei Umgebungsvariablen, mit denen der
+Live-Teil gegen sie läuft.
+
+**Das ist eine Testattrappe, keine Referenzimplementierung.** Sie speichert nichts, sie
+rechnet nichts, und sie setzt keine fachliche Regel durch. Wer eine Instanz baut, prüft sie
+mit `npm run test:live` gegen das echte System.
 
 **Der Code in diesem Ordner ist englisch**, Bezeichner wie Kommentare, so wie aller Code im Projekt. Deutsch bleibt die Dokumentation daneben.
 
@@ -35,16 +57,21 @@ Zwei Seiten sollen sich testen lassen:
 - Jede Operation nimmt an der Versionsaushandlung teil: optionaler Anfragekopf, HTTP 409 als Antwort, und jede Erfolgsantwort nennt die bediente Version
 - Kein Bezeichner, aus dem ein Generator Code macht, sieht deutsch aus: Schema- und Komponentennamen, Parameter, Tags und operationIds
 
-## Was der Live-Teil prüfen soll
+## Was der Live-Teil heute prüft
 
-- Vorhandensein und Methode aller in der OpenAPI-Definition beschriebenen Endpunkte
-- Pflichtfelder und Datentypen der Antworten gegen die Schemas aus [`../schemas/`](../schemas/)
-- Verhalten ohne Token und mit abgelaufenem Token: HTTP 401
-- Verhalten bei fehlendem Scope: HTTP 403 mit Angabe des fehlenden Scopes, nicht HTTP 404
-- Paginierung und ETag: `If-None-Match` mit unverändertem Stand liefert HTTP 304
+- Jeder GET-Endpunkt des Vertrags ist vorhanden, antwortet also weder mit 404 noch mit 5xx
+- Ein Aufruf ohne Token wird mit HTTP 401 beantwortet
+- Ein fehlender Scope wird mit HTTP 403 beantwortet und benennt den fehlenden Scope, nicht mit 404
+- Jede Liste hält die Schemas aus [`../schemas/`](../schemas/) ein, Pflichtfelder und Datentypen inbegriffen
+- ETag: `If-None-Match` mit unverändertem Stand liefert HTTP 304
 - Idempotenz: derselbe `Idempotency-Key` erzeugt keinen zweiten Datensatz
-- Beträge als Integer-Cent, Datumsangaben nach ISO 8601
-- Zugriffsprotokoll: jeder Aufruf taucht im Protokoll auf, und zwar auf beiden Seiten
+- Zugriffsprotokoll: jeder Aufruf taucht im Protokoll der eigenen Kanzlei auf
+- Die Instanz nennt im Kopf `X-OpenGewerk-Api-Version` die bediente Version, und deren Hauptversion passt zum Vertrag
+- Eine unverträgliche Hauptversion wird mit HTTP 409 beantwortet
+
+Noch offen im Live-Teil: Paginierung über mehrere Seiten, das Zugriffsprotokoll auf der
+Hub-Seite und der Hub als Client, also sein Verhalten bei unbekannten Feldern und bei einem
+nicht erreichbaren Mandanten.
 
 ## Wie die Suite aufgebaut sein soll
 
@@ -54,5 +81,6 @@ Die Tests laufen gegen eine laufende Instanz, deren Basis-URL und Token von auß
 
 - **Die Nutzlast des Betriebsprüfungs-Exports**, sie ist noch nicht festgelegt.
 - **Der Verbindungsaufbau** über den Einladungscode. Er läuft heute außerhalb der Spezifikation, nur die Adresse für die Token-Ausgabe ist reserviert.
+- **Die Antwort auf eine fehlerhafte Anfrage.** Der Vertrag kennt Pflichtparameter, sagt aber an keiner Operation, womit eine Instanz antwortet, wenn einer fehlt: weder 400 noch 422 sind dort beschrieben. Die Attrappe antwortet mit HTTP 400 und einem `Error`-Objekt. Solange der Vertrag dazu schweigt, kann die Suite das nicht prüfen.
 
 Verbindlich ist und bleibt die OpenAPI-Definition unter [`../openapi/opengewerk-kanzlei-api.yaml`](../openapi/opengewerk-kanzlei-api.yaml). Diese Suite prüft, ob eine Implementierung ihr folgt, sie ersetzt sie nicht.
