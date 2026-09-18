@@ -12,6 +12,24 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 - Initiales Repository-Gerüst
 - CI-Job "Schreibweise", der Gedankenstriche im gesamten Repository meldet
 
+## [Unreleased]
+
+### Sicherheit
+
+- CodeQL als erweiterte Einrichtung, geprüft werden die Workflow-Dateien und der
+  JavaScript-Anteil unter `conformance/`, wöchentlich und bei jedem Push auf `main`
+- `@redocly/cli` von 1.x auf 2.x angehoben. Die 1.x zog über `respect-core` das Paket
+  `@faker-js/faker` in Version 7.6.0 herein, für das GitHub eine Meldung mit
+  Schweregrad hoch führt (CVE-2026-73231, Codeausführung über `helpers.fake`). Die 2.x
+  hat überhaupt keine Abhängigkeiten mehr, damit fällt der ganze Teilbaum weg und die
+  Sperre ist nicht umgangen, sondern gegenstandslos
+
+### Geändert
+
+- Die CI prüft die OpenAPI-Datei mit der im Projekt festgelegten redocly-Version statt
+  mit `npx @redocly/cli@latest`. Eine Prüfung, deren Werkzeug sich ohne Commit ändern
+  kann, meldet irgendwann etwas, das niemand verursacht hat
+
 ## [0.4.0]
 
 ### Hinzugefügt

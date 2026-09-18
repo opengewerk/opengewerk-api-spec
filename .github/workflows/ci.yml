@@ -91,9 +91,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
 
       - name: OpenAPI-Datei prüfen
-        run: npx --yes @redocly/cli@latest lint openapi/opengewerk-kanzlei-api.yaml
+        run: npm run lint:openapi
 
   schreibweise:
     name: Schreibweise
