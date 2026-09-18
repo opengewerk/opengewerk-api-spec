@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.1.0
+  version: 0.2.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -45,7 +45,7 @@ servers:
         description: Hostname der Mandanten-Instanz, vom Mandanten beim Handshake mitgeteilt
 
 security:
-  - bearerAuth: []
+  - kanzleiToken: []
 
 tags:
   - name: Buchhaltung
@@ -70,6 +70,8 @@ paths:
       description: |
         Liefert die Buchungsperioden des Mandanten mit Festschreibungsstatus und
         den Werten der Umsatzsteuer-Voranmeldung. Benötigt den Scope `read:periods`.
+      security:
+        - kanzleiToken: [read:periods]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -87,6 +89,8 @@ paths:
         Liefert die Buchungssätze des Mandanten für einen Zeitraum, paginiert.
         Festgeschriebene Buchungen sind als solche gekennzeichnet.
         Benötigt den Scope `read:ledger`.
+      security:
+        - kanzleiToken: [read:ledger]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -103,6 +107,8 @@ paths:
       description: |
         Liefert den Kontenplan mit Kontonummer, Bezeichnung, Kontenrahmen und
         Automatikkonten-Kennzeichen. Benötigt den Scope `read:ledger`.
+      security:
+        - kanzleiToken: [read:ledger]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -119,6 +125,8 @@ paths:
       description: |
         Liefert die Summen- und Saldenliste zu einem Stichtag.
         Benötigt den Scope `read:ledger`.
+      security:
+        - kanzleiToken: [read:ledger]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -135,6 +143,8 @@ paths:
       description: |
         Liefert die offenen Posten mit Fälligkeit, Mahnstufe und Restbetrag.
         Benötigt den Scope `read:ledger`.
+      security:
+        - kanzleiToken: [read:ledger]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -153,6 +163,8 @@ paths:
         Belegdaten nicht dauerhaft. Benötigt den Scope `read:documents`.
       parameters:
         - $ref: "#/components/parameters/BelegId"
+      security:
+        - kanzleiToken: [read:documents]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -171,6 +183,8 @@ paths:
       description: |
         Legt eine Rückfrage an, die im Mandantensystem am Beleg und im
         Rückfragen-Postfach erscheint. Benötigt den Scope `write:comments`.
+      security:
+        - kanzleiToken: [write:comments]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -188,6 +202,8 @@ paths:
         Reicht einen Vorschlag ein, den der Mandant mit einem Klick bestätigt.
         Benötigt den Scope `write:proposals`. Direktes Buchen ohne Bestätigung
         verlangt zusätzlich den Scope `write:closing`.
+      security:
+        - kanzleiToken: [write:proposals]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -205,6 +221,8 @@ paths:
         Überträgt Standard-Kontierungen, Automatikkonten und Steuerschlüssel an
         den Mandanten. Der Mandant sieht eine Vorschau vor der Übernahme.
         Benötigt den Scope `write:coa`.
+      security:
+        - kanzleiToken: [write:coa]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -222,6 +240,8 @@ paths:
         Stößt einen Z1-, Z2- oder Z3-Export nach GDPdU an. Der Export läuft im
         Mandantensystem, der Hub bekommt einen Verweis auf das Ergebnis.
         Benötigt den Scope `export:audit`.
+      security:
+        - kanzleiToken: [export:audit]
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -240,6 +260,8 @@ paths:
         Instanz. Dieselben Einträge sieht der Mandant in seiner Oberfläche.
         Das Protokoll ist für beide Seiten einsehbar und braucht keinen
         zusätzlichen Scope.
+      security:
+        - kanzleiToken: []
       responses:
         "200":
           $ref: "#/components/responses/Erfolg"
@@ -248,14 +270,36 @@ paths:
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
+    kanzleiToken:
+      type: oauth2
       description: |
         Der beim Handshake ausgehandelte Token wird als Bearer-Token gesendet.
-        Der Token ist an die Hub-Instanz gebunden (mTLS-Zertifikat oder DPoP),
-        rotierbar und läuft bei Inaktivität ab. Der Mandant kann ihn jederzeit
-        sofort sperren.
+        Er trägt genau die Scopes, die der Mandant vergeben hat, ist rotierbar,
+        läuft bei Inaktivität ab und kann vom Mandanten jederzeit sofort gesperrt
+        werden.
+
+        Die erste Fassung arbeitet mit rotierenden Token bei erzwungenem HTTPS
+        und kurzer Laufzeit. Eine kryptografische Bindung an die Hub-Instanz
+        (DPoP oder mTLS) ist vorgesehen, aber nicht Teil dieser Fassung, siehe
+        ADR 0006 im Repository `opengewerk`.
+
+        Die unter `tokenUrl` genannte Adresse ist für die Ausgabe und Erneuerung
+        des Tokens reserviert. Der Verbindungsaufbau selbst läuft über den
+        Einladungscode des Mandanten und ist in dieser Fassung noch nicht als
+        Endpunkt beschrieben.
+      flows:
+        clientCredentials:
+          tokenUrl: https://{mandant}/api/kanzlei/v1/token
+          scopes:
+            read:ledger: Journal, Konten, Salden und offene Posten lesen
+            read:documents: Belegbilder und E-Rechnungs-XML lesen
+            read:master: Stammdaten zu Kunden, Lieferanten und Anlagen lesen
+            read:periods: Festschreibungsstatus und Werte der Umsatzsteuer-Voranmeldung lesen
+            write:comments: Rückfragen und Kommentare an Belegen hinterlassen
+            write:proposals: Buchungs- und Kontierungsvorschläge einreichen
+            write:coa: Kontenrahmen-Profil und Automatikkonten setzen
+            write:closing: Abschlussbuchungen direkt buchen
+            export:audit: Betriebsprüfungs-Export auslösen
 
   parameters:
     BelegId:
