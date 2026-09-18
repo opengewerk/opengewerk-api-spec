@@ -19,6 +19,10 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- CodeQL ermittelt die zu prüfenden Sprachen aus dem Dateibestand, statt sie in einer
+  Liste zu führen. In den anderen drei Repositories stand dort nur `actions`, mit einer
+  Notiz, sie beim ersten Code zu ergänzen; hier steht dieselbe Datei, damit es überall
+  dieselbe ist
 - Alle Abhängigkeiten auf die neuestmögliche Version: `js-yaml` von 4 auf 5, dadurch
   `import { load } from 'js-yaml'` statt der weggefallenen Standardausfuhr. Node in der
   CI von 22 auf 24, passend zur lokalen Entwicklung
