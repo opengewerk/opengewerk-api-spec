@@ -12,7 +12,7 @@
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { contract, operations, validator, validate } from './contract.mjs'
+import { contract, operations, parametersOf, validator, validate } from './contract.mjs'
 
 const baseUrl = process.env.OPENGEWERK_BASE_URL
 const token = process.env.OPENGEWERK_TOKEN
@@ -25,7 +25,11 @@ const skip = baseUrl && token
 const ajv = validator()
 
 /** One request against the instance under test. */
-async function call(path, { method = 'GET', headers = {}, body, bearer = token } = {}) {
+async function call(path, options = {}) {
+  const { method = 'GET', headers = {}, body } = options
+  // A destructuring default would put the token back exactly where a check wants
+  // none, so `bearer: undefined` has to keep meaning "send no token at all".
+  const bearer = 'bearer' in options ? options.bearer : token
   const response = await fetch(new URL(baseUrl + path), {
     method,
     headers: {
@@ -45,19 +49,26 @@ async function call(path, { method = 'GET', headers = {}, body, bearer = token }
   return { status: response.status, headers: response.headers, payload, text }
 }
 
-/** Query parameters the contract marks as required, filled with usable values. */
+/**
+ * Query parameters the contract marks as required, filled with usable values.
+ * The names come from the contract itself, so a renamed parameter shows up as a
+ * failing check instead of a quietly dropped one.
+ */
 function requiredQuery(operation) {
   const today = new Date().toISOString().slice(0, 10)
-  const startOfYear = `${today.slice(0, 4)}-01-01`
-  const values = { from: startOfYear, to: today, as_of: today }
-  const params = (operation.parameters ?? [])
-    .map((p) => p.$ref?.split('/').pop())
-    .filter(Boolean)
+  const values = {
+    from: `${today.slice(0, 4)}-01-01`,
+    to: today,
+    as_of: today,
+  }
   const query = new URLSearchParams()
-  for (const name of params) {
-    if (name === 'Von') query.set('from', values.from)
-    if (name === 'Bis') query.set('to', values.to)
-    if (name === 'Stichtag') query.set('as_of', values.as_of)
+  for (const parameter of parametersOf(operation)) {
+    if (parameter.in !== 'query' || !parameter.required) continue
+    const value = values[parameter.name]
+    if (value === undefined) {
+      throw new Error(`the live suite has no value for the required parameter ${parameter.name}`)
+    }
+    query.set(parameter.name, value)
   }
   const suffix = query.toString()
   return suffix ? `?${suffix}` : ''

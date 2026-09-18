@@ -44,6 +44,17 @@ export function scopesOf(operation) {
   return entries.flatMap((entry) => Object.values(entry).flat())
 }
 
+/** Parameters of an operation, every $ref resolved against the components. */
+export function parametersOf(operation) {
+  return (operation.parameters ?? []).map((parameter) => {
+    if (!parameter.$ref) return parameter
+    const name = parameter.$ref.split('/').pop()
+    const resolved = contract.components.parameters[name]
+    if (!resolved) throw new Error(`Unknown parameter reference ${parameter.$ref}`)
+    return resolved
+  })
+}
+
 /** Scopes declared in the security scheme. */
 export function declaredScopes() {
   const scheme = contract.components.securitySchemes.taxFirmToken

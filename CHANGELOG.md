@@ -11,8 +11,28 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 - Initiales Repository-Gerüst
 - CI-Job "Schreibweise", der Gedankenstriche im gesamten Repository meldet
+- Attrappe `conformance/fixture-instance.mjs`, die den Vertrag beantwortet, dazu die
+  Skripte `npm run test:fixture` und `npm run fixture`. Damit läuft der Live-Teil der
+  Konformitätstests in der CI gegen etwas, statt übersprungen zu werden. Alles, was sich
+  aus dem Vertrag ableiten lässt, leitet die Attrappe daraus ab, und jede Nutzlast wird
+  vor dem Ausliefern gegen ihr Schema geprüft
 
-## [Unreleased]
+### Geändert
+
+- Alle Abhängigkeiten auf die neuestmögliche Version: `js-yaml` von 4 auf 5, dadurch
+  `import { load } from 'js-yaml'` statt der weggefallenen Standardausfuhr. Node in der
+  CI von 22 auf 24, passend zur lokalen Entwicklung
+- Die CI prüft die OpenAPI-Datei mit der im Projekt festgelegten redocly-Version statt
+  mit `npx @redocly/cli@latest`. Eine Prüfung, deren Werkzeug sich ohne Commit ändern
+  kann, meldet irgendwann etwas, das niemand verursacht hat
+
+### Behoben
+
+- Zwei Fehler im Live-Teil, die erst der Lauf gegen die Attrappe gezeigt hat. Die
+  Pflichtparameter `from`, `to` und `as_of` wurden nie gesetzt, weil die Suite noch nach
+  den deutschen Parameternamen von vor 0.4.0 suchte; sie liest die Namen jetzt aus dem
+  Vertrag. Und die Prüfung "Aufruf ohne Token" schickte den Token trotzdem mit, weil ein
+  Vorgabewert beim Destrukturieren auch bei `undefined` greift
 
 ### Sicherheit
 
@@ -23,15 +43,6 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   Schweregrad hoch führt (CVE-2026-73231, Codeausführung über `helpers.fake`). Die 2.x
   hat überhaupt keine Abhängigkeiten mehr, damit fällt der ganze Teilbaum weg und die
   Sperre ist nicht umgangen, sondern gegenstandslos
-
-### Geändert
-
-- Alle Abhängigkeiten auf die neuestmögliche Version: `js-yaml` von 4 auf 5, dadurch
-  `import { load } from 'js-yaml'` statt der weggefallenen Standardausfuhr. Node in der
-  CI von 22 auf 24, passend zur lokalen Entwicklung
-- Die CI prüft die OpenAPI-Datei mit der im Projekt festgelegten redocly-Version statt
-  mit `npx @redocly/cli@latest`. Eine Prüfung, deren Werkzeug sich ohne Commit ändern
-  kann, meldet irgendwann etwas, das niemand verursacht hat
 
 ## [0.4.0]
 

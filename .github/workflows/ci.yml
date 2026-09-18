@@ -80,6 +80,9 @@ jobs:
       - name: Statische Prüfungen ausführen
         run: npm run test:static
 
+      - name: Live-Prüfungen gegen die Attrappe ausführen
+        run: npm run test:fixture
+
   openapi:
     name: OpenAPI-Definition validieren
     runs-on: ubuntu-latest

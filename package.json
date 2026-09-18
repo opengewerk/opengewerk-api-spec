@@ -12,6 +12,8 @@
     "test": "node --test \"conformance/*.test.mjs\"",
     "test:static": "node --test conformance/static.test.mjs",
     "test:live": "node --test conformance/live.test.mjs",
+    "test:fixture": "node conformance/run-live-against-fixture.mjs",
+    "fixture": "node conformance/fixture-instance.mjs",
     "lint:openapi": "redocly lint openapi/opengewerk-kanzlei-api.yaml"
   },
   "devDependencies": {
