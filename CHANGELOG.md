@@ -19,6 +19,10 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die Workflow-Dateien folgen der Regel "Code ist immer Englisch": Job-Kennungen,
+  Variablen und Kommentare in den eingebetteten Skripten sind englisch. Deutsch bleibt,
+  was ein Mensch liest, also die Job- und Schrittnamen in der Actions-Oberfläche und die
+  Meldungen, die eine Prüfung ausgibt
 - CodeQL ermittelt die zu prüfenden Sprachen aus dem Dateibestand, statt sie in einer
   Liste zu führen. In den anderen drei Repositories stand dort nur `actions`, mit einer
   Notiz, sie beim ersten Code zu ergänzen; hier steht dieselbe Datei, damit es überall
