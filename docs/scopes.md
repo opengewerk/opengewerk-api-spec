@@ -2,7 +2,7 @@
 
 Ein Scope ist eine einzelne Berechtigung, die der Mandant seiner Kanzlei erteilt. Vergeben werden sie beim Verbindungsaufbau und sind danach jederzeit einzeln änderbar oder widerrufbar. Lesen ist der Default, Schreiben muss der Mandant bewusst freigeben.
 
-Quelle: Planungskonzept OpenGewerk Kanzlei v1.1, Abschnitt 2.5.
+Quelle: Planungskonzept OpenGewerk Kanzlei v1.2, Abschnitt 2.5.
 
 | Scope | Inhalt | Default |
 | --- | --- | --- |
