@@ -2,7 +2,7 @@
 
 Die Mandanten-Instanz meldet Ereignisse aktiv an den angebundenen Kanzlei-Hub, damit dieser seine Übersicht nicht dauernd neu abfragen muss. Die Richtung ist immer Mandant an Hub.
 
-Quelle: Feature-Gliederung Handwerkersoftware v2.2, Abschnitt 4.13.
+Quelle: Feature-Gliederung Handwerkersoftware v2.3, Abschnitt 4.13.
 
 ## Ereignisse
 

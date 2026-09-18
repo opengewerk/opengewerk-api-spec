@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/buchungsvorschlag.schema.json",
-  "title": "Buchungsvorschlag",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/booking-proposal.schema.json",
+  "title": "Booking proposal",
   "description": "Ein Kontierungsvorschlag der Kanzlei. Ein Vorschlag bucht nichts: Der Mandant gibt ihn frei, erst dann entstehen Journalzeilen. Nur mit dem Scope write:closing darf die Kanzlei das Freigeben überspringen.",
   "type": "object",
   "additionalProperties": false,
@@ -56,7 +56,7 @@
       "minItems": 1,
       "description": "Vorgeschlagene Buchungssätze.",
       "items": {
-        "$ref": "#/$defs/Zeile"
+        "$ref": "#/$defs/Line"
       }
     },
     "comment": {
@@ -99,7 +99,7 @@
     }
   },
   "$defs": {
-    "Zeile": {
+    "Line": {
       "type": "object",
       "additionalProperties": false,
       "description": "Ein vorgeschlagener Buchungssatz.",
@@ -149,8 +149,8 @@
         }
       }
     },
-    "Neu": {
-      "title": "Neuer Buchungsvorschlag",
+    "New": {
+      "title": "New booking proposal",
       "description": "Nutzlast für POST /proposals. Kennung, Status und Zeitpunkt vergibt das Mandantensystem.",
       "type": "object",
       "additionalProperties": false,
@@ -184,7 +184,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "#/$defs/Zeile"
+            "$ref": "#/$defs/Line"
           },
           "description": "Vorgeschlagene Buchungssätze."
         },

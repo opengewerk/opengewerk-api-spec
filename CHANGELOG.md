@@ -12,6 +12,27 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 - Initiales Repository-Gerüst
 - CI-Job "Schreibweise", der Gedankenstriche im gesamten Repository meldet
 
+## [0.4.0]
+
+### Hinzugefügt
+
+- Versionsaushandlung: Jede Antwort nennt im Kopf `X-OpenGewerk-Api-Version` die
+  Vertragsversion der Instanz, jede Anfrage darf denselben Kopf mitschicken, und eine
+  unverträgliche Hauptversion wird mit HTTP 409 beantwortet statt mit einer Nutzlast,
+  die die Gegenseite nicht lesen kann. Die Konzepte verlangen diese Deklaration seit
+  jeher, der Vertrag schwieg dazu
+
+### Geändert
+
+- Alle Bezeichner, aus denen ein Generator Code macht, sind jetzt englisch: die zehn
+  Schema-Dateien (`journalzeile` wird zu `journal-entry` und so weiter) samt `$id`,
+  `title` und den Schlüsseln unter `$defs`, die elf operationIds (`journalLesen` wird zu
+  `readJournal`), die Komponentennamen (`Fehler` wird zu `Error`, `ScopeFehlt` zu
+  `ScopeMissing`), das Sicherheitsschema (`kanzleiToken` wird zu `taxFirmToken`), die
+  Parameter und die Tags. Beschreibungen, Zusammenfassungen und die Dokumentation
+  daneben bleiben deutsch
+- Im Fehlerobjekt heißt `meldung` jetzt `message`
+
 ## [0.3.0]
 
 ### Hinzugefügt

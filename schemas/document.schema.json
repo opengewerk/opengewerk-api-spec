@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/beleg.schema.json",
-  "title": "Beleg",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/document.schema.json",
+  "title": "Document",
   "description": "Ein Beleg des Mandanten mit seinen Dateien. Das Belegbild und ein etwaiges E-Rechnungs-XML werden über die aufgeführten Dateien geladen, nicht als Inhalt dieser Antwort.",
   "type": "object",
   "additionalProperties": false,

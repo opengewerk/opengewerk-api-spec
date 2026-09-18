@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/konto.schema.json",
-  "title": "Konto",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/account.schema.json",
+  "title": "Account",
   "description": "Ein Konto aus dem Kontenplan des Mandanten.",
   "type": "object",
   "additionalProperties": false,

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.3.0
+  version: 0.4.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -34,6 +34,12 @@ info:
     paginierung: >
       Listen sind paginiert und liefern ETag; der Hub sendet If-None-Match und
       bekommt bei unverändertem Stand 304 zurück.
+    versionsaushandlung: >
+      Jede Antwort traegt den Kopf X-OpenGewerk-Api-Version mit der Version, die
+      die Instanz bedient. Der Hub darf denselben Kopf an jeder Anfrage mitschicken,
+      um zu sagen, gegen welche Version er gebaut ist. Weichen die Hauptversionen
+      voneinander ab, antwortet die Instanz mit HTTP 409 und liefert keine Nutzlast,
+      die der Hub nicht lesen koennte.
     idempotenz: >
       Schreibende Aufrufe verlangen den Kopf Idempotency-Key. Ein wiederholter
       Aufruf mit demselben Schlüssel erzeugt keinen zweiten Datensatz.
@@ -47,41 +53,44 @@ servers:
         description: Hostname der Mandanten-Instanz, vom Mandanten beim Handshake mitgeteilt
 
 security:
-  - kanzleiToken: []
+  - taxFirmToken: []
 
 tags:
-  - name: Buchhaltung
+  - name: Accounting
     description: Lesende Sicht auf Journal, Konten, Salden und offene Posten
-  - name: Belege
+  - name: Documents
     description: Belegbilder und E-Rechnungs-XML einzelner Belege
-  - name: Perioden
+  - name: Periods
     description: Festschreibungsstatus und Werte der Umsatzsteuer-Voranmeldung
-  - name: Zusammenarbeit
+  - name: Collaboration
     description: Rückfragen der Kanzlei und Buchungsvorschläge zur Freigabe durch den Mandanten
-  - name: Stammdaten
+  - name: MasterData
     description: Kontenrahmen-Profil der Kanzlei
-  - name: Nachweise
+  - name: Records
     description: Betriebsprüfungs-Export und Zugriffsprotokoll
 
 paths:
   /periods:
     get:
-      tags: [Perioden]
-      operationId: periodenLesen
+      tags: [Periods]
+      operationId: readPeriods
       summary: Perioden mit Festschreibungsstatus abrufen
       description: |
         Liefert die Buchungsperioden des Mandanten mit Festschreibungsstatus und
         den Werten der Umsatzsteuer-Voranmeldung. Benötigt den Scope `read:periods`.
       security:
-        - kanzleiToken: [read:periods]
+        - taxFirmToken: [read:periods]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
-        - $ref: "#/components/parameters/Jahr"
+        - $ref: "#/components/parameters/Year"
       responses:
         "200":
           description: Perioden des Mandanten
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -94,37 +103,42 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/periode.schema.json"
+                      $ref: "../schemas/period.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /journal:
     get:
-      tags: [Buchhaltung]
-      operationId: journalLesen
+      tags: [Accounting]
+      operationId: readJournal
       summary: Journalzeilen eines Zeitraums abrufen
       description: |
         Liefert die Buchungssätze des Mandanten für einen Zeitraum, paginiert.
         Festgeschriebene Buchungen sind als solche gekennzeichnet.
         Benötigt den Scope `read:ledger`.
       security:
-        - kanzleiToken: [read:ledger]
+        - taxFirmToken: [read:ledger]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
-        - $ref: "#/components/parameters/Von"
-        - $ref: "#/components/parameters/Bis"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
       responses:
         "200":
           description: Journalzeilen des angefragten Zeitraums
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -137,34 +151,39 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/journalzeile.schema.json"
+                      $ref: "../schemas/journal-entry.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /accounts:
     get:
-      tags: [Buchhaltung]
-      operationId: kontenLesen
+      tags: [Accounting]
+      operationId: readAccounts
       summary: Kontenplan des Mandanten abrufen
       description: |
         Liefert den Kontenplan mit Kontonummer, Bezeichnung, Kontenrahmen und
         Automatikkonten-Kennzeichen. Benötigt den Scope `read:ledger`.
       security:
-        - kanzleiToken: [read:ledger]
+        - taxFirmToken: [read:ledger]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
           description: Kontenplan des Mandanten
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -177,35 +196,40 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/konto.schema.json"
+                      $ref: "../schemas/account.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /balances:
     get:
-      tags: [Buchhaltung]
-      operationId: saldenLesen
+      tags: [Accounting]
+      operationId: readBalances
       summary: Salden je Konto für einen Stichtag abrufen
       description: |
         Liefert die Summen- und Saldenliste zu einem Stichtag.
         Benötigt den Scope `read:ledger`.
       security:
-        - kanzleiToken: [read:ledger]
+        - taxFirmToken: [read:ledger]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
-        - $ref: "#/components/parameters/Stichtag"
+        - $ref: "#/components/parameters/AsOf"
       responses:
         "200":
           description: Salden je Konto zum Stichtag
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -218,34 +242,39 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/saldo.schema.json"
+                      $ref: "../schemas/balance.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /open-items:
     get:
-      tags: [Buchhaltung]
-      operationId: offenePostenLesen
+      tags: [Accounting]
+      operationId: readOpenItems
       summary: Offene Posten der Debitoren und Kreditoren abrufen
       description: |
         Liefert die offenen Posten mit Fälligkeit, Mahnstufe und Restbetrag.
         Benötigt den Scope `read:ledger`.
       security:
-        - kanzleiToken: [read:ledger]
+        - taxFirmToken: [read:ledger]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
           description: Offene Posten des Mandanten
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -258,177 +287,208 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/offener-posten.schema.json"
+                      $ref: "../schemas/open-item.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /documents/{id}:
     get:
-      tags: [Belege]
-      operationId: belegLesen
+      tags: [Documents]
+      operationId: readDocument
       summary: Einzelnen Beleg mit Bild und E-Rechnungs-XML abrufen
       description: |
         Liefert einen einzelnen Beleg zur Anzeige im Hub. Der Hub speichert
         Belegdaten nicht dauerhaft. Benötigt den Scope `read:documents`.
       parameters:
-        - $ref: "#/components/parameters/BelegId"
+        - $ref: "#/components/parameters/ApiVersion"
+        - $ref: "#/components/parameters/DocumentId"
       security:
-        - kanzleiToken: [read:documents]
+        - taxFirmToken: [read:documents]
       responses:
         "200":
           description: Beleg mit seinen Dateien
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
             application/json:
               schema:
-                $ref: "../schemas/beleg.schema.json"
+                $ref: "../schemas/document.schema.json"
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
         "404":
-          $ref: "#/components/responses/NichtGefunden"
+          $ref: "#/components/responses/NotFound"
 
   /inquiries:
     post:
-      tags: [Zusammenarbeit]
-      operationId: rueckfrageStellen
+      tags: [Collaboration]
+      operationId: createInquiry
       summary: Rückfrage der Kanzlei an einem Beleg anlegen
       description: |
         Legt eine Rückfrage an, die im Mandantensystem am Beleg und im
         Rückfragen-Postfach erscheint. Benötigt den Scope `write:comments`.
       security:
-        - kanzleiToken: [write:comments]
+        - taxFirmToken: [write:comments]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "../schemas/rueckfrage.schema.json#/$defs/Neu"
+              $ref: "../schemas/inquiry.schema.json#/$defs/New"
       responses:
         "201":
           description: Rückfrage angelegt
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
           content:
             application/json:
               schema:
-                $ref: "../schemas/rueckfrage.schema.json"
+                $ref: "../schemas/inquiry.schema.json"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
         "422":
-          $ref: "#/components/responses/NichtVerarbeitbar"
+          $ref: "#/components/responses/UnprocessableEntity"
 
   /proposals:
     post:
-      tags: [Zusammenarbeit]
-      operationId: buchungsvorschlagEinreichen
+      tags: [Collaboration]
+      operationId: submitProposal
       summary: Buchungs- oder Kontierungsvorschlag einreichen
       description: |
         Reicht einen Vorschlag ein, den der Mandant mit einem Klick bestätigt.
         Benötigt den Scope `write:proposals`. Direktes Buchen ohne Bestätigung
         verlangt zusätzlich den Scope `write:closing`.
       security:
-        - kanzleiToken: [write:proposals]
+        - taxFirmToken: [write:proposals]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "../schemas/buchungsvorschlag.schema.json#/$defs/Neu"
+              $ref: "../schemas/booking-proposal.schema.json#/$defs/New"
       responses:
         "201":
           description: Vorschlag eingereicht
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
           content:
             application/json:
               schema:
-                $ref: "../schemas/buchungsvorschlag.schema.json"
+                $ref: "../schemas/booking-proposal.schema.json"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
         "422":
-          $ref: "#/components/responses/NichtVerarbeitbar"
+          $ref: "#/components/responses/UnprocessableEntity"
 
   /coa-profile:
     put:
-      tags: [Stammdaten]
-      operationId: kontenrahmenProfilSetzen
+      tags: [MasterData]
+      operationId: setChartOfAccountsProfile
       summary: Kontenrahmen-Profil der Kanzlei übertragen
       description: |
         Überträgt Standard-Kontierungen, Automatikkonten und Steuerschlüssel an
         den Mandanten. Der Mandant sieht eine Vorschau vor der Übernahme.
         Benötigt den Scope `write:coa`.
       security:
-        - kanzleiToken: [write:coa]
+        - taxFirmToken: [write:coa]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "../schemas/kontenrahmen-profil.schema.json"
+              $ref: "../schemas/chart-of-accounts-profile.schema.json"
       responses:
         "200":
           description: Profil übernommen oder zur Vorschau hinterlegt
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
           content:
             application/json:
               schema:
-                $ref: "../schemas/kontenrahmen-profil.schema.json"
+                $ref: "../schemas/chart-of-accounts-profile.schema.json"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
         "422":
-          $ref: "#/components/responses/NichtVerarbeitbar"
+          $ref: "#/components/responses/UnprocessableEntity"
 
   /audit-export:
     post:
-      tags: [Nachweise]
-      operationId: betriebspruefungsExportAusloesen
+      tags: [Records]
+      operationId: startAuditExport
       summary: Export für die Betriebsprüfung auslösen
       description: |
         Stößt einen Z1-, Z2- oder Z3-Export nach GDPdU an. Der Export läuft im
         Mandantensystem, der Hub bekommt einen Verweis auf das Ergebnis.
         Benötigt den Scope `export:audit`.
       security:
-        - kanzleiToken: [export:audit]
+        - taxFirmToken: [export:audit]
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/IdempotencyKey"
       responses:
         "202":
           description: |
             Export angestoßen. Die Nutzlast dieses Endpunkts ist noch nicht
             festgelegt, sie gehört nicht zu den zehn Schemas unter `schemas/`.
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Platzhalter"
+                $ref: "#/components/schemas/Placeholder"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
         "403":
-          $ref: "#/components/responses/ScopeFehlt"
+          $ref: "#/components/responses/ScopeMissing"
 
   /access-log:
     get:
-      tags: [Nachweise]
-      operationId: zugriffsprotokollLesen
+      tags: [Records]
+      operationId: readAccessLog
       summary: Zugriffsprotokoll der eigenen Kanzlei abrufen
       description: |
         Liefert die protokollierten Zugriffe der anfragenden Kanzlei auf diese
@@ -436,14 +496,17 @@ paths:
         Das Protokoll ist für beide Seiten einsehbar und braucht keinen
         zusätzlichen Scope.
       security:
-        - kanzleiToken: []
+        - taxFirmToken: []
       parameters:
+        - $ref: "#/components/parameters/ApiVersion"
         - $ref: "#/components/parameters/Cursor"
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
           description: Protokollierte Zugriffe der eigenen Kanzlei
           headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
             ETag:
               $ref: "#/components/headers/ETag"
           content:
@@ -456,18 +519,20 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "../schemas/protokolleintrag.schema.json"
+                      $ref: "../schemas/access-log-entry.schema.json"
                   next_cursor:
                     type: [string, "null"]
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
-          $ref: "#/components/responses/NichtModifiziert"
+          $ref: "#/components/responses/NotModified"
         "401":
-          $ref: "#/components/responses/NichtAuthentifiziert"
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
 
 components:
   securitySchemes:
-    kanzleiToken:
+    taxFirmToken:
       type: oauth2
       description: |
         Der beim Handshake ausgehandelte Token wird als Bearer-Token gesendet.
@@ -499,7 +564,7 @@ components:
             export:audit: Betriebsprüfungs-Export auslösen
 
   parameters:
-    BelegId:
+    DocumentId:
       name: id
       in: path
       required: true
@@ -526,7 +591,7 @@ components:
         maximum: 500
         default: 100
 
-    Von:
+    From:
       name: from
       in: query
       required: true
@@ -535,7 +600,7 @@ components:
         type: string
         format: date
 
-    Bis:
+    To:
       name: to
       in: query
       required: true
@@ -544,7 +609,7 @@ components:
         type: string
         format: date
 
-    Stichtag:
+    AsOf:
       name: as_of
       in: query
       required: true
@@ -553,7 +618,7 @@ components:
         type: string
         format: date
 
-    Jahr:
+    Year:
       name: year
       in: query
       required: false
@@ -561,6 +626,19 @@ components:
       schema:
         type: integer
         minimum: 2000
+
+    ApiVersion:
+      name: X-OpenGewerk-Api-Version
+      in: header
+      required: false
+      description: |
+        Vertragsversion, gegen die der Hub gebaut ist. Weicht die Hauptversion von
+        der Version der Instanz ab, antwortet die Instanz mit HTTP 409, statt eine
+        Antwort zu liefern, die der Hub nicht lesen kann. Fehlt der Kopf, nimmt die
+        Instanz Vertraeglichkeit an.
+      schema:
+        type: string
+        pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
 
     IdempotencyKey:
       name: Idempotency-Key
@@ -576,6 +654,15 @@ components:
         maxLength: 128
 
   headers:
+    ApiVersion:
+      description: |
+        Vertragsversion, die diese Instanz bedient. Sie steht an jeder Antwort, auch
+        an Fehlerantworten, damit der Hub die Version schon beim ersten Aufruf kennt
+        und nicht erst beim ersten Bruch.
+      schema:
+        type: string
+      required: true
+
     ETag:
       description: |
         Kennzeichen des ausgelieferten Standes. Der Hub sendet es beim nächsten
@@ -584,23 +671,23 @@ components:
         type: string
 
   schemas:
-    Platzhalter:
-      title: Platzhalter
+    Placeholder:
+      title: Placeholder
       description: |
         Die Nutzlast dieses Endpunkts ist noch nicht festgelegt. Die verbindlichen
         Schemas entstehen unter `schemas/` und werden an dieser Stelle eingehängt,
         sobald sie vorliegen.
 
-    Fehler:
-      title: Fehler
+    Error:
+      title: Error
       description: Einheitliche Fehlerantwort aller Endpunkte
       type: object
-      required: [code, meldung]
+      required: [code, message]
       properties:
         code:
           type: string
           description: Maschinenlesbarer Fehlercode
-        meldung:
+        message:
           type: string
           description: Beschreibung des Fehlers für Menschen
         scope:
@@ -608,33 +695,45 @@ components:
           description: Der fehlende Scope, falls der Fehler daran liegt
 
   responses:
-    NichtModifiziert:
+    NotModified:
       description: Der Stand hat sich seit dem mitgesendeten ETag nicht geändert
 
-    NichtVerarbeitbar:
+    ApiVersionIncompatible:
+      description: |
+        Die Hauptversion im Kopf X-OpenGewerk-Api-Version passt nicht zu der Version,
+        die diese Instanz bedient
+      headers:
+        X-OpenGewerk-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    UnprocessableEntity:
       description: Die Anfrage ist wohlgeformt, aber fachlich nicht verarbeitbar
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Fehler"
+            $ref: "#/components/schemas/Error"
 
-    NichtAuthentifiziert:
+    Unauthenticated:
       description: Kein oder ungültiger Token
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Fehler"
+            $ref: "#/components/schemas/Error"
 
-    ScopeFehlt:
+    ScopeMissing:
       description: Der Mandant hat den nötigen Scope nicht freigegeben
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Fehler"
+            $ref: "#/components/schemas/Error"
 
-    NichtGefunden:
+    NotFound:
       description: Die angeforderte Ressource gibt es nicht
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Fehler"
+            $ref: "#/components/schemas/Error"

@@ -12,7 +12,7 @@
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { operations, validator, validate } from './contract.mjs'
+import { contract, operations, validator, validate } from './contract.mjs'
 
 const baseUrl = process.env.OPENGEWERK_BASE_URL
 const token = process.env.OPENGEWERK_TOKEN
@@ -85,12 +85,12 @@ test('a missing scope is answered with 403 and names the scope', { skip: skip ||
 
 test('list responses match their schema', { skip }, async () => {
   const listEndpoints = [
-    ['/periods', 'periode.schema.json'],
-    ['/journal', 'journalzeile.schema.json'],
-    ['/accounts', 'konto.schema.json'],
-    ['/balances', 'saldo.schema.json'],
-    ['/open-items', 'offener-posten.schema.json'],
-    ['/access-log', 'protokolleintrag.schema.json'],
+    ['/periods', 'period.schema.json'],
+    ['/journal', 'journal-entry.schema.json'],
+    ['/accounts', 'account.schema.json'],
+    ['/balances', 'balance.schema.json'],
+    ['/open-items', 'open-item.schema.json'],
+    ['/access-log', 'access-log-entry.schema.json'],
   ]
   for (const [path, schemaFile] of listEndpoints) {
     const operation = operations().find((o) => o.path === path && o.method === 'get').operation
@@ -140,6 +140,20 @@ test('every call shows up in the access log', { skip }, async () => {
   assert.ok(found, 'the probing call is missing from the access log')
 })
 
-// Not covered yet: version negotiation. The concept asks both sides to declare
-// which contract version they support, but the contract does not say how, so
-// there is nothing to test against. See conformance/README.md.
+test('the instance names the contract version it serves', { skip }, async () => {
+  const operation = operations().find((o) => o.path === '/periods').operation
+  const { headers } = await call('/periods' + requiredQuery(operation))
+  const served = headers.get('x-opengewerk-api-version')
+  assert.ok(served, 'the header X-OpenGewerk-Api-Version is missing')
+  const [servedMajor] = served.split('.')
+  const [expectedMajor] = contract.info.version.split('.')
+  assert.equal(servedMajor, expectedMajor, `instance serves ${served}, contract is ${contract.info.version}`)
+})
+
+test('an incompatible major version is answered with 409', { skip }, async () => {
+  const operation = operations().find((o) => o.path === '/periods').operation
+  const { status } = await call('/periods' + requiredQuery(operation), {
+    headers: { 'X-OpenGewerk-Api-Version': '99.0.0' },
+  })
+  assert.equal(status, 409, 'an unreadable version must not be answered with data')
+})

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/offener-posten.schema.json",
-  "title": "Offener Posten",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/open-item.schema.json",
+  "title": "Open item",
   "description": "Eine noch nicht ausgeglichene Forderung oder Verbindlichkeit.",
   "type": "object",
   "additionalProperties": false,

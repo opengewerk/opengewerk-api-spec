@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/periode.schema.json",
-  "title": "Periode",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/period.schema.json",
+  "title": "Period",
   "description": "Eine Buchungsperiode mit Festschreibungsstatus und den Werten der Umsatzsteuer-Voranmeldung.",
   "type": "object",
   "additionalProperties": false,

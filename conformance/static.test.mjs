@@ -126,6 +126,39 @@ test('every declared scope is described in docs/scopes.md', () => {
   }
 })
 
+test('every operation takes part in version negotiation', () => {
+  for (const { path, method, operation } of operations()) {
+    const refs = (operation.parameters ?? []).map((p) => p.$ref ?? '')
+    assert.ok(
+      refs.some((r) => r.endsWith('/ApiVersion')),
+      `${method.toUpperCase()} ${path}: the request header is missing`,
+    )
+    assert.ok(operation.responses['409'], `${method.toUpperCase()} ${path}: 409 missing`)
+    for (const [code, response] of Object.entries(operation.responses)) {
+      if (!code.startsWith('2')) continue
+      assert.ok(
+        response.headers?.['X-OpenGewerk-Api-Version'],
+        `${method.toUpperCase()} ${path}: ${code} does not name the served version`,
+      )
+    }
+  }
+})
+
+test('identifiers a generator turns into code are English', () => {
+  const german = /[äöüß]|(?:ung|heit|keit|lesen|schreiben)/i
+  const names = [
+    ...Object.keys(contract.components.schemas ?? {}),
+    ...Object.keys(contract.components.parameters ?? {}),
+    ...Object.keys(contract.components.responses ?? {}),
+    ...Object.keys(contract.components.headers ?? {}),
+    ...Object.keys(contract.components.securitySchemes ?? {}),
+    ...(contract.tags ?? []).map((t) => t.name),
+    ...operations().map(({ operation }) => operation.operationId),
+  ]
+  const suspicious = names.filter((name) => german.test(name))
+  assert.deepEqual(suspicious, [], 'these identifiers look German')
+})
+
 test('the contract version is mirrored in package.json', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
   assert.equal(pkg.version, contract.info.version, 'package.json and info.version drifted apart')
