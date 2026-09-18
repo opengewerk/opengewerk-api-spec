@@ -32,6 +32,8 @@ Zwei Seiten sollen sich testen lassen:
 - Jede Liste liefert ein `ETag` und beantwortet `If-None-Match` mit 304
 - Die Zuordnung Endpunkt zu Scope stimmt mit `docs/scopes.md` überein, in beide Richtungen
 - `info.version` und die Version in `package.json` laufen nicht auseinander
+- Jede Operation nimmt an der Versionsaushandlung teil: optionaler Anfragekopf, HTTP 409 als Antwort, und jede Erfolgsantwort nennt die bediente Version
+- Kein Bezeichner, aus dem ein Generator Code macht, sieht deutsch aus: Schema- und Komponentennamen, Parameter, Tags und operationIds
 
 ## Was der Live-Teil prüfen soll
 
@@ -50,7 +52,6 @@ Die Tests laufen gegen eine laufende Instanz, deren Basis-URL und Token von auß
 
 ## Was noch nicht geprüft wird
 
-- **Versionsaushandlung.** Die Konzepte verlangen, dass Hub und Mandant die unterstützte Vertragsversion deklarieren. Wie, steht nirgends. Solange der Vertrag dazu schweigt, gibt es nichts zu prüfen.
 - **Die Nutzlast des Betriebsprüfungs-Exports**, sie ist noch nicht festgelegt.
 - **Der Verbindungsaufbau** über den Einladungscode. Er läuft heute außerhalb der Spezifikation, nur die Adresse für die Token-Ausgabe ist reserviert.
 

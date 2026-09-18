@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/journalzeile.schema.json",
-  "title": "Journalzeile",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/journal-entry.schema.json",
+  "title": "Journal entry",
   "description": "Ein Buchungssatz im Journal des Mandanten. Festgeschriebene Zeilen werden nie geändert oder gelöscht, eine Korrektur entsteht als Gegenbuchung.",
   "type": "object",
   "additionalProperties": false,

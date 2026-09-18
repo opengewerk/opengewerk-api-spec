@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/protokolleintrag.schema.json",
-  "title": "Protokolleintrag",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/access-log-entry.schema.json",
+  "title": "Access log entry",
   "description": "Ein protokollierter Zugriff der Kanzlei auf die Mandanten-Instanz. Jeder Aufruf wird protokolliert, auch ein abgelehnter, und beide Seiten können das Protokoll einsehen.",
   "type": "object",
   "additionalProperties": false,

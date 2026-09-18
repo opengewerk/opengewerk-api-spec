@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/saldo.schema.json",
-  "title": "Saldo",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/balance.schema.json",
+  "title": "Balance",
   "description": "Summen und Saldo eines Kontos zu einem Stichtag.",
   "type": "object",
   "additionalProperties": false,

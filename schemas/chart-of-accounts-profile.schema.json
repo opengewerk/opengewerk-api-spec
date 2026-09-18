@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/kontenrahmen-profil.schema.json",
-  "title": "Kontenrahmen-Profil",
+  "$id": "https://opengewerk.de/schemas/kanzlei-api/v0/chart-of-accounts-profile.schema.json",
+  "title": "Chart of accounts profile",
   "description": "Das Kontierungsprofil der Kanzlei: Kontenrahmen, Automatikkonten und Steuerschlüssel. Der Mandant sieht eine Vorschau, bevor er es übernimmt.",
   "type": "object",
   "additionalProperties": false,

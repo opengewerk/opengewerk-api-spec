@@ -46,7 +46,7 @@ export function scopesOf(operation) {
 
 /** Scopes declared in the security scheme. */
 export function declaredScopes() {
-  const scheme = contract.components.securitySchemes.kanzleiToken
+  const scheme = contract.components.securitySchemes.taxFirmToken
   return Object.keys(scheme.flows.clientCredentials.scopes)
 }
 
