@@ -10,3 +10,4 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 ### Hinzugefügt
 
 - Initiales Repository-Gerüst
+- CI-Job "Schreibweise", der Gedankenstriche im gesamten Repository meldet
