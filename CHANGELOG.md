@@ -48,6 +48,18 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   hat überhaupt keine Abhängigkeiten mehr, damit fällt der ganze Teilbaum weg und die
   Sperre ist nicht umgangen, sondern gegenstandslos
 
+## [0.5.0]
+
+### Hinzugefügt
+
+- Jede der elf Operationen beschreibt jetzt, womit sie eine nicht auswertbare Anfrage
+  beantwortet: HTTP 400 mit dem `Error`-Objekt. Der Vertrag kannte Pflichtparameter,
+  sagte aber an keiner Stelle, was eine Instanz tut, wenn einer fehlt. Weder 400 noch 422
+  standen dort, also hätte sich jede Implementierung etwas anderes ausgedacht und die
+  Konformitätstests hätten es nicht prüfen können
+- Das Fehlerobjekt trägt das optionale Feld `parameter`, das den beanstandeten Parameter
+  benennt, so wie `scope` den fehlenden Scope benennt
+
 ## [0.4.0]
 
 ### Hinzugefügt

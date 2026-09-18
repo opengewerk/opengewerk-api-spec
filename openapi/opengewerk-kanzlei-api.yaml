@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.4.0
+  version: 0.5.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -109,6 +109,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -157,6 +159,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -202,6 +206,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -248,6 +254,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -293,6 +301,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -327,6 +337,8 @@ paths:
                 $ref: "../schemas/document.schema.json"
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -365,6 +377,8 @@ paths:
             application/json:
               schema:
                 $ref: "../schemas/inquiry.schema.json"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -404,6 +418,8 @@ paths:
             application/json:
               schema:
                 $ref: "../schemas/booking-proposal.schema.json"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -443,6 +459,8 @@ paths:
             application/json:
               schema:
                 $ref: "../schemas/chart-of-accounts-profile.schema.json"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -478,6 +496,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Placeholder"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -525,6 +545,8 @@ paths:
                     description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
         "304":
           $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "409":
@@ -693,8 +715,28 @@ components:
         scope:
           type: string
           description: Der fehlende Scope, falls der Fehler daran liegt
+        parameter:
+          type: string
+          description: |
+            Der beanstandete Parameter, falls der Fehler an einem einzelnen hängt.
+            Bei einem Kopf steht hier dessen Name, etwa Idempotency-Key.
 
   responses:
+    BadRequest:
+      description: |
+        Die Anfrage ist nicht auswertbar: ein Pflichtparameter fehlt, ein Wert hält sein
+        Format nicht ein, oder der Rumpf ist kein gültiges JSON. Das Fehlerobjekt benennt
+        im Feld parameter den beanstandeten Parameter, sofern es an einem einzelnen liegt.
+        Diese Antwort sagt nichts über Berechtigungen: ein fehlender Scope wird mit 403
+        beantwortet, auch wenn zusätzlich ein Parameter fehlt.
+      headers:
+        X-OpenGewerk-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
     NotModified:
       description: Der Stand hat sich seit dem mitgesendeten ETag nicht geändert
 

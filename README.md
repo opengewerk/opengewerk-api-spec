@@ -41,7 +41,9 @@ Solange die Hauptversion 0 ist, kann sich der Vertrag noch in jeder Nebenversion
 
 ## Konformitätstests
 
-Der Ordner `conformance/` ist bislang leer bis auf seine Beschreibung. Geplant ist eine Testsuite, die eine laufende Implementierung gegen die Spezifikation prüft: vorhandene Endpunkte, Pflichtfelder, Fehlercodes, Verhalten bei fehlendem Scope, ETag- und Idempotenz-Verhalten. Bis dahin ist die OpenAPI-Datei die einzige verbindliche Quelle.
+Der Ordner `conformance/` enthält die Testsuite, mit der eine Implementierung gegen die Spezifikation geprüft wird. Der statische Teil hält den Vertrag mit sich selbst und mit `docs/scopes.md` zusammen und läuft in der CI bei jedem Push. Der Live-Teil prüft eine laufende Instanz: vorhandene Endpunkte, Pflichtfelder gegen die Schemas, Fehlercodes, Verhalten bei fehlendem Scope, ETag, Idempotenz und Versionsaushandlung. Solange niemand eine Instanz betreibt, läuft er gegen die mitgelieferte Attrappe. Einzelheiten in [`conformance/README.md`](conformance/README.md).
+
+Verbindlich bleibt die OpenAPI-Datei. Die Suite prüft, ob eine Implementierung ihr folgt, sie ersetzt sie nicht.
 
 ## Verwendung
 
