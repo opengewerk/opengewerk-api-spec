@@ -1,6 +1,6 @@
 {
   "name": "opengewerk-kanzlei-api-spec",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Interface contract between an OpenGewerk instance and the Kanzlei hub, including conformance tests",
   "license": "Apache-2.0",

@@ -52,6 +52,40 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   hat überhaupt keine Abhängigkeiten mehr, damit fällt der ganze Teilbaum weg und die
   Sperre ist nicht umgangen, sondern gegenstandslos
 
+## [0.6.0]
+
+### Hinzugefügt
+
+- Jede der sechs Listen sagt, wie sie ordnet: Perioden nach Beginn, Journalzeilen nach
+  Buchungsdatum, Konten und Salden nach Kontonummer, offene Posten nach Fälligkeit, das
+  Zugriffsprotokoll nach Zeitpunkt absteigend, jeweils mit `id` als Tiebreaker, wo zwei
+  Zeilen gleich liegen können. Ohne Zusage kann ein Cursor über zwei Seiten eine Zeile
+  doppeln oder auslassen, und eine Konformitätssuite darf nicht prüfen, was der Vertrag
+  nicht zusichert
+- Der ETag-Kopf sagt, worauf er sich bezieht: auf genau diese Seite, also auf die
+  Kombination aus Endpunkt, Filtern, Cursor und Limit, nicht auf die Liste als Ganzes
+- `Idempotency-Key` legt die beiden offenen Fälle fest. Derselbe Schlüssel mit einem
+  abweichenden Körper wird mit HTTP 422 abgelehnt statt stillschweigend mit der ersten
+  Antwort beschieden, sonst hielte der Hub etwas für gespeichert, was nie ankam. Und ein
+  Schlüssel bleibt mindestens 24 Stunden gebunden
+- `POST /audit-export` führt 422 wie die drei anderen schreibenden Operationen. Ohne das
+  sagte der Kopf etwas zu, was diese eine Operation nicht deklarierte
+- Alle neun Zeitstempel tragen ein Muster, das UTC erzwingt. `format: date-time` allein
+  lässt jeden Offset durch, während `x-konventionen.datumsangaben` UTC vorschreibt: zwei
+  Seiten wären sich um Stunden uneins gewesen, wann ein Beleg ausgestellt wurde. Eine
+  statische Prüfung hält das fest
+- Eine statische Prüfung, die den in `docs/scopes.md` genannten Namen des
+  Sicherheitsschemas gegen den Vertrag hält
+
+### Geändert
+
+- Die Versionsaushandlung liest sich unterhalb von 1.0.0 über die Nebenversion. Die
+  Hauptversion ist bis dahin immer 0, ein Vergleich der Null allein war also keiner,
+  während sich der Vertrag laut README in jeder Nebenversion ändern darf und das in
+  0.4.0 auch getan hat. Attrappe und Live-Test ziehen mit
+- `docs/scopes.md` nennt das Sicherheitsschema `taxFirmToken`. Es heißt seit 0.4.0 so,
+  im Vertrag an allen vierzehn Stellen; im Dokument stand weiter der alte Name
+
 ## [0.5.0]
 
 ### Hinzugefügt

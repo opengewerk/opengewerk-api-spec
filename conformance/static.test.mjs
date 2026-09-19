@@ -60,6 +60,26 @@ test('amounts are integer cents, floating point nowhere', () => {
   assert.deepEqual(offenders, [])
 })
 
+test('every timestamp is pinned to UTC, not merely to RFC 3339', () => {
+  // `format: date-time` alone accepts 2026-09-19T08:00:00+02:00, while
+  // x-konventionen.datumsangaben says UTC. A validator that only knows the
+  // format would let the offset through, and two sides would then disagree by
+  // hours about when a document was issued.
+  const utc = String.raw`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$`
+  const offenders = []
+  const walk = (node, path) => {
+    if (!node || typeof node !== 'object') return
+    if (node.format === 'date-time' && node.pattern !== utc) {
+      offenders.push(`${path}: ${node.pattern ? 'other pattern' : 'no pattern'}`)
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === 'object') walk(value, `${path}/${key}`)
+    }
+  }
+  for (const [name, schema] of Object.entries(schemas)) walk(schema, name)
+  assert.deepEqual(offenders, [], 'these timestamps accept any offset')
+})
+
 test('every schema is actually referenced by the OpenAPI file', () => {
   const text = readFileSync(join(root, 'openapi', 'opengewerk-kanzlei-api.yaml'), 'utf8')
   const unused = schemaFiles.filter((name) => !text.includes(`../schemas/${name}`))
@@ -123,6 +143,21 @@ test('the scope mapping matches docs/scopes.md', () => {
     for (const scope of scopes) {
       assert.ok(line.includes(scope), `scopes.md does not name ${scope} for ${path}`)
     }
+  }
+})
+
+test('docs/scopes.md names the security scheme the contract actually has', () => {
+  // The mapping tests above read endpoint and scope out of the table and would
+  // not notice the name of the scheme going stale beside them. It did: the
+  // document still said `kanzleiToken` after 0.4.0 renamed it in all fourteen
+  // places of the contract.
+  const doc = readFileSync(join(root, 'docs', 'scopes.md'), 'utf8')
+  const declared = Object.keys(contract.components.securitySchemes)
+  const named = [...doc.matchAll(/Sicherheitsschema `([^`]+)`/g)].map((match) => match[1])
+
+  assert.ok(named.length > 0, 'scopes.md names no security scheme at all')
+  for (const name of named) {
+    assert.ok(declared.includes(name), `scopes.md names ${name}, the contract has ${declared}`)
   }
 })
 

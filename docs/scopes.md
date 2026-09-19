@@ -18,7 +18,7 @@ Quelle: Planungskonzept OpenGewerk Kanzlei v1.2, Abschnitt 2.5.
 
 ## Zuordnung zu den Endpunkten
 
-Diese Zuordnung steht seit Version 0.2.0 auch in der OpenAPI-Datei selbst: Das Sicherheitsschema `kanzleiToken` ist ein OAuth-2.0-Schema mit dem Flow `clientCredentials`, und jede Operation deklariert den Scope, den sie verlangt. Ein Konformitätstest kann die Zuordnung damit prüfen, statt sie aus dieser Tabelle ablesen zu müssen. Die Tabelle bleibt als lesbare Fassung daneben stehen, sie ist nicht die Quelle.
+Diese Zuordnung steht seit Version 0.2.0 auch in der OpenAPI-Datei selbst: Das Sicherheitsschema `taxFirmToken` ist ein OAuth-2.0-Schema mit dem Flow `clientCredentials`, und jede Operation deklariert den Scope, den sie verlangt. Ein Konformitätstest kann die Zuordnung damit prüfen, statt sie aus dieser Tabelle ablesen zu müssen. Die Tabelle bleibt als lesbare Fassung daneben stehen, sie ist nicht die Quelle.
 
 | Endpunkt | Nötiger Scope |
 | --- | --- |
