@@ -11,10 +11,13 @@ Quelle: Feature-Gliederung Handwerkersoftware v2.3, Abschnitt 4.13.
 | Neuer Beleg | Ein Beleg ist im Mandantensystem angelegt worden |
 | Beleg geändert | Ein bestehender Beleg wurde geändert, storniert oder korrigiert |
 | Rückfrage beantwortet | Der Mandant hat eine Rückfrage der Kanzlei beantwortet |
+| Vorschlag entschieden | Der Mandant hat einen Buchungsvorschlag übernommen oder abgelehnt |
 | Periode festgeschrieben | Eine Buchungsperiode wurde festgeschrieben |
 | Bankumsatz ohne Beleg | Ein Bankumsatz konnte keinem Beleg zugeordnet werden |
 
 Das letzte Ereignis ist der Auslöser für die Fehlende-Belege-Liste im Hub: Ein Bankumsatz ohne Beleg wird dort automatisch als Rückfrage vorgeschlagen.
+
+"Vorschlag entschieden" schließt den Kreis zu `GET /proposals`. Ohne das Ereignis bliebe dem Hub nur, die Liste in Abständen abzufragen, und bei einem Vorschlag, über den tagelang niemand entscheidet, wäre jede Abfrage bis dahin umsonst.
 
 ## Zustellung
 

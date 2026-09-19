@@ -218,6 +218,11 @@ const accessLog = []
 
 // --- request handling ------------------------------------------------------
 
+// What the fixture has been handed, newest first, so the reading endpoints have
+// something to show. A real instance keeps this in its database.
+const inquiries = []
+const proposals = []
+
 const fail = (code, message, extra = {}) => ({ code, message, ...extra })
 
 const page = (items) => ({ items, next_cursor: null })
@@ -275,6 +280,10 @@ const endpoints = {
       return { status: 200, body: document }
     },
   },
+  readInquiries: {
+    itemSchema: 'inquiry.schema.json',
+    handle: () => ({ status: 200, body: page(inquiries) }),
+  },
   createInquiry: {
     schema: 'inquiry.schema.json',
     handle: ({ body }) => {
@@ -282,20 +291,23 @@ const endpoints = {
       if (!checked.valid) {
         return { status: 422, body: fail('unprocessable_entity', checked.errors.join(', ')) }
       }
-      return {
-        status: 201,
-        body: {
-          id: `inq-${randomUUID()}`,
-          status: 'open',
-          subject: body.subject,
-          body: body.body,
-          reference: body.reference,
-          created_at: new Date().toISOString(),
-          created_by: 'Fixture-Kanzlei',
-          ...(body.due_date ? { due_date: body.due_date } : {}),
-        },
+      const created = {
+        id: `inq-${randomUUID()}`,
+        status: 'open',
+        subject: body.subject,
+        body: body.body,
+        reference: body.reference,
+        created_at: new Date().toISOString(),
+        created_by: 'Fixture-Kanzlei',
+        ...(body.due_date ? { due_date: body.due_date } : {}),
       }
+      inquiries.unshift(created)
+      return { status: 201, body: created }
     },
+  },
+  readProposals: {
+    itemSchema: 'booking-proposal.schema.json',
+    handle: () => ({ status: 200, body: page(proposals) }),
   },
   submitProposal: {
     schema: 'booking-proposal.schema.json',
@@ -304,29 +316,29 @@ const endpoints = {
       if (!checked.valid) {
         return { status: 422, body: fail('unprocessable_entity', checked.errors.join(', ')) }
       }
-      return {
-        status: 201,
-        body: {
-          id: `bp-${randomUUID()}`,
-          status: 'proposed',
-          lines: body.lines,
-          created_at: new Date().toISOString(),
-          created_by: 'Fixture-Kanzlei',
-          ...(body.reference ? { reference: body.reference } : {}),
-          ...(body.comment ? { comment: body.comment } : {}),
-          ...(body.post_directly === undefined ? {} : { post_directly: body.post_directly }),
-        },
+      const created = {
+        id: `bp-${randomUUID()}`,
+        status: 'proposed',
+        lines: body.lines,
+        created_at: new Date().toISOString(),
+        created_by: 'Fixture-Kanzlei',
+        ...(body.reference ? { reference: body.reference } : {}),
+        ...(body.comment ? { comment: body.comment } : {}),
+        ...(body.post_directly === undefined ? {} : { post_directly: body.post_directly }),
       }
+      proposals.unshift(created)
+      return { status: 201, body: created }
     },
   },
   setChartOfAccountsProfile: {
-    schema: 'chart-of-accounts-profile.schema.json',
     handle: ({ body }) => {
       const checked = validate(ajv, 'chart-of-accounts-profile.schema.json', body)
       if (!checked.valid) {
         return { status: 422, body: fail('unprocessable_entity', checked.errors.join(', ')) }
       }
-      return { status: 200, body }
+      // The fixture applies right away. A real instance leaves the decision to
+      // the tenant, which is exactly why the contract carries the state.
+      return { status: 200, body: { state: 'applied', profile: body } }
     },
   },
   startAuditExport: {

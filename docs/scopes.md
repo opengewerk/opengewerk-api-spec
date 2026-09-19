@@ -25,7 +25,8 @@ Diese Zuordnung steht seit Version 0.2.0 auch in der OpenAPI-Datei selbst: Das S
 | `GET /journal`, `GET /accounts`, `GET /balances`, `GET /open-items` | `read:ledger` |
 | `GET /documents/{id}` | `read:documents` |
 | `GET /periods` | `read:periods` |
-| `POST /inquiries` | `write:comments` |
+| `GET /inquiries`, `POST /inquiries` | `write:comments` |
+| `GET /proposals` | `write:proposals` |
 | `POST /proposals` | `write:proposals`, für direktes Buchen zusätzlich `write:closing` |
 | `PUT /coa-profile` | `write:coa` |
 | `POST /audit-export` | `export:audit` |

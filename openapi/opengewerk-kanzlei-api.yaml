@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.6.0
+  version: 0.7.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -365,6 +365,59 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   /inquiries:
+    get:
+      tags: [Collaboration]
+      operationId: readInquiries
+      summary: Rückfragen dieser Kanzlei abrufen
+      description: |
+        Liefert die Rückfragen, die diese Kanzlei an diesem Mandanten
+        angelegt hat, mit Status und Antworten. Ohne diesen Weg wäre eine
+        abgesendete Rückfrage für ihren Absender unerreichbar, und das
+        Rückfragen-Postfach über alle Mandanten ließe sich nicht bauen.
+        Benötigt den Scope `write:comments`, denselben wie das Anlegen: wer
+        fragen darf, darf die Antwort lesen.
+
+        Sortiert nach Zeitpunkt der Anlage absteigend, die jüngste zuerst, bei
+        gleichem Zeitpunkt nach `id`.
+      security:
+        - taxFirmToken: [write:comments]
+      parameters:
+        - $ref: "#/components/parameters/ApiVersion"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Rückfragen dieser Kanzlei
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/inquiry.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
+        "403":
+          $ref: "#/components/responses/ScopeMissing"
+
     post:
       tags: [Collaboration]
       operationId: createInquiry
@@ -405,6 +458,58 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
 
   /proposals:
+    get:
+      tags: [Collaboration]
+      operationId: readProposals
+      summary: Buchungsvorschläge dieser Kanzlei abrufen
+      description: |
+        Liefert die Vorschläge, die diese Kanzlei an diesem Mandanten
+        eingereicht hat, mit Status, Entscheidung und den Kennungen der
+        entstandenen Buchungen. Ohne diesen Weg bliebe nach dem Einreichen
+        unsichtbar, ob der Mandant zugestimmt hat. Benötigt den Scope
+        `write:proposals`, denselben wie das Einreichen.
+
+        Sortiert nach Zeitpunkt der Einreichung absteigend, der jüngste zuerst,
+        bei gleichem Zeitpunkt nach `id`.
+      security:
+        - taxFirmToken: [write:proposals]
+      parameters:
+        - $ref: "#/components/parameters/ApiVersion"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Buchungsvorschläge dieser Kanzlei
+          headers:
+            X-OpenGewerk-Api-Version:
+              $ref: "#/components/headers/ApiVersion"
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "../schemas/booking-proposal.schema.json"
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Cursor der nächsten Seite. Null bedeutet, dass keine weitere folgt.
+        "304":
+          $ref: "#/components/responses/NotModified"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "409":
+          $ref: "#/components/responses/ApiVersionIncompatible"
+        "403":
+          $ref: "#/components/responses/ScopeMissing"
+
     post:
       tags: [Collaboration]
       operationId: submitProposal
@@ -454,6 +559,13 @@ paths:
         Überträgt Standard-Kontierungen, Automatikkonten und Steuerschlüssel an
         den Mandanten. Der Mandant sieht eine Vorschau vor der Übernahme.
         Benötigt den Scope `write:coa`.
+
+        Konten, die das Profil nicht nennt, bleiben unberührt. Die Liste
+        `accounts` sagt, was angelegt oder geändert werden soll, sie ist keine
+        Aufzählung dessen, was danach da sein soll.
+
+        Ob das Profil sofort gilt oder erst als Vorschau liegt, entscheidet der
+        Mandant in seiner Instanz. Die Antwort sagt es im Feld `state`.
       security:
         - taxFirmToken: [write:coa]
       parameters:
@@ -467,14 +579,29 @@ paths:
               $ref: "../schemas/chart-of-accounts-profile.schema.json"
       responses:
         "200":
-          description: Profil übernommen oder zur Vorschau hinterlegt
+          description: |
+            Profil übernommen oder zur Vorschau hinterlegt. Welches von beidem,
+            steht in `state`: ohne dieses Feld könnte die Kanzlei die beiden
+            Fälle nicht unterscheiden, und die Vorschau wäre für sie unsichtbar.
           headers:
             X-OpenGewerk-Api-Version:
               $ref: "#/components/headers/ApiVersion"
           content:
             application/json:
               schema:
-                $ref: "../schemas/chart-of-accounts-profile.schema.json"
+                type: object
+                additionalProperties: false
+                required: [state, profile]
+                properties:
+                  state:
+                    type: string
+                    enum: [applied, pending_preview]
+                    description: |
+                      `applied`, wenn das Profil ab `valid_from` gilt.
+                      `pending_preview`, wenn es beim Mandanten liegt und auf
+                      dessen Freigabe wartet.
+                  profile:
+                    $ref: "../schemas/chart-of-accounts-profile.schema.json"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
