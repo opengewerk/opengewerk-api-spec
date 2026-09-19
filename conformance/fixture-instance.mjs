@@ -367,6 +367,20 @@ function checkPayload(operationId, result) {
   }
 }
 
+/**
+ * Whether a caller built against `asked` can read what an instance on `serves`
+ * answers. The major decides, except while it is 0: the contract may change in
+ * any minor until 1.0.0, so comparing the zero alone would compare nothing.
+ */
+function compatible(asked, serves) {
+  const [askedMajor, askedMinor] = asked.split('.')
+  const [servesMajor, servesMinor] = serves.split('.')
+
+  if (askedMajor !== servesMajor) return false
+
+  return servesMajor !== '0' || askedMinor === servesMinor
+}
+
 async function answer(request) {
   const url = new URL(request.url, 'http://fixture.invalid')
   const path = url.pathname.startsWith(basePath) ? url.pathname.slice(basePath.length) : undefined
@@ -374,7 +388,7 @@ async function answer(request) {
   // Version negotiation comes first: it decides whether the caller could read an
   // answer at all.
   const requested = request.headers['x-opengewerk-api-version']
-  if (requested && requested.split('.')[0] !== version.split('.')[0]) {
+  if (requested && !compatible(requested, version)) {
     return { status: 409, body: fail('api_version_incompatible', `this instance serves ${version}`) }
   }
 

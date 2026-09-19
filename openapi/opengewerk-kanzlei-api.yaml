@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: OpenGewerk Kanzlei-API
-  version: 0.5.0
+  version: 0.6.0
   summary: Schnittstelle zwischen einer OpenGewerk-Instanz und dem Kanzlei-Hub
   description: |
     Diese Spezifikation beschreibt die Endpunkte, die eine OpenGewerk-Instanz für
@@ -35,14 +35,20 @@ info:
       Listen sind paginiert und liefern ETag; der Hub sendet If-None-Match und
       bekommt bei unverändertem Stand 304 zurück.
     versionsaushandlung: >
-      Jede Antwort traegt den Kopf X-OpenGewerk-Api-Version mit der Version, die
+      Jede Antwort trägt den Kopf X-OpenGewerk-Api-Version mit der Version, die
       die Instanz bedient. Der Hub darf denselben Kopf an jeder Anfrage mitschicken,
       um zu sagen, gegen welche Version er gebaut ist. Weichen die Hauptversionen
       voneinander ab, antwortet die Instanz mit HTTP 409 und liefert keine Nutzlast,
-      die der Hub nicht lesen koennte.
+      die der Hub nicht lesen könnte. Solange die Hauptversion 0 ist, tritt die
+      Nebenversion an ihre Stelle: der Vertrag darf sich bis 1.0.0 in jeder
+      Nebenversion ändern, ein Vergleich allein der Null wäre bis dahin kein
+      Vergleich.
     idempotenz: >
       Schreibende Aufrufe verlangen den Kopf Idempotency-Key. Ein wiederholter
-      Aufruf mit demselben Schlüssel erzeugt keinen zweiten Datensatz.
+      Aufruf mit demselben Schlüssel erzeugt keinen zweiten Datensatz, sondern
+      liefert das Ergebnis des ersten. Derselbe Schlüssel mit einem abweichenden
+      Körper wird mit HTTP 422 abgelehnt, und ein Schlüssel bleibt mindestens
+      24 Stunden gebunden.
 
 servers:
   - url: https://{mandant}/api/kanzlei/v1
@@ -78,6 +84,8 @@ paths:
       description: |
         Liefert die Buchungsperioden des Mandanten mit Festschreibungsstatus und
         den Werten der Umsatzsteuer-Voranmeldung. Benötigt den Scope `read:periods`.
+
+        Sortiert nach Beginn der Periode aufsteigend.
       security:
         - taxFirmToken: [read:periods]
       parameters:
@@ -127,6 +135,8 @@ paths:
         Liefert die Buchungssätze des Mandanten für einen Zeitraum, paginiert.
         Festgeschriebene Buchungen sind als solche gekennzeichnet.
         Benötigt den Scope `read:ledger`.
+
+        Sortiert nach Buchungsdatum aufsteigend, bei gleichem Datum nach `id`.
       security:
         - taxFirmToken: [read:ledger]
       parameters:
@@ -176,6 +186,8 @@ paths:
       description: |
         Liefert den Kontenplan mit Kontonummer, Bezeichnung, Kontenrahmen und
         Automatikkonten-Kennzeichen. Benötigt den Scope `read:ledger`.
+
+        Sortiert nach Kontonummer aufsteigend, als Zeichenkette verglichen.
       security:
         - taxFirmToken: [read:ledger]
       parameters:
@@ -223,6 +235,8 @@ paths:
       description: |
         Liefert die Summen- und Saldenliste zu einem Stichtag.
         Benötigt den Scope `read:ledger`.
+
+        Sortiert nach Kontonummer aufsteigend, als Zeichenkette verglichen.
       security:
         - taxFirmToken: [read:ledger]
       parameters:
@@ -271,6 +285,8 @@ paths:
       description: |
         Liefert die offenen Posten mit Fälligkeit, Mahnstufe und Restbetrag.
         Benötigt den Scope `read:ledger`.
+
+        Sortiert nach Fälligkeit aufsteigend, bei gleicher Fälligkeit nach `id`.
       security:
         - taxFirmToken: [read:ledger]
       parameters:
@@ -502,6 +518,8 @@ paths:
           $ref: "#/components/responses/Unauthenticated"
         "409":
           $ref: "#/components/responses/ApiVersionIncompatible"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
         "403":
           $ref: "#/components/responses/ScopeMissing"
 
@@ -515,6 +533,9 @@ paths:
         Instanz. Dieselben Einträge sieht der Mandant in seiner Oberfläche.
         Das Protokoll ist für beide Seiten einsehbar und braucht keinen
         zusätzlichen Scope.
+
+        Sortiert nach Zeitpunkt des Zugriffs absteigend, der jüngste zuerst, bei
+        gleichem Zeitpunkt nach `id`.
       security:
         - taxFirmToken: []
       parameters:
@@ -656,8 +677,10 @@ components:
       description: |
         Vertragsversion, gegen die der Hub gebaut ist. Weicht die Hauptversion von
         der Version der Instanz ab, antwortet die Instanz mit HTTP 409, statt eine
-        Antwort zu liefern, die der Hub nicht lesen kann. Fehlt der Kopf, nimmt die
-        Instanz Vertraeglichkeit an.
+        Antwort zu liefern, die der Hub nicht lesen kann. Solange beide Seiten die
+        Hauptversion 0 tragen, entscheidet stattdessen die Nebenversion, denn bis
+        1.0.0 darf sich der Vertrag in jeder Nebenversion ändern. Fehlt der Kopf,
+        nimmt die Instanz Verträglichkeit an.
       schema:
         type: string
         pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
@@ -670,6 +693,16 @@ components:
         Schlüssel, mit dem ein wiederholter Aufruf erkannt wird. Derselbe
         Schlüssel erzeugt keinen zweiten Datensatz, sondern liefert das Ergebnis
         des ersten Aufrufs.
+
+        Kommt derselbe Schlüssel mit einem abweichenden Körper, ist das kein
+        Wiederholen, sondern ein Fehler auf der Gegenseite: die Instanz antwortet
+        mit HTTP 422 und führt nichts aus. Stillschweigend die erste Antwort zu
+        liefern wäre schlimmer, der Hub hielte dann etwas für gespeichert, was nie
+        ankam.
+
+        Ein Schlüssel bleibt mindestens 24 Stunden ab dem ersten Aufruf gebunden.
+        Danach darf die Instanz ihn vergessen, und ein Aufruf mit demselben
+        Schlüssel zählt wieder als neuer.
       schema:
         type: string
         minLength: 8
@@ -689,6 +722,13 @@ components:
       description: |
         Kennzeichen des ausgelieferten Standes. Der Hub sendet es beim nächsten
         Abruf als If-None-Match und bekommt bei unverändertem Stand HTTP 304.
+
+        Es bezieht sich auf genau diese Seite, also auf die Antwort zu dieser
+        Kombination aus Endpunkt, Filtern, Cursor und Limit, nicht auf die Liste
+        als Ganzes. Ein Hub, der über mehrere Seiten blättert, hält je Seite ein
+        eigenes ETag. Gleicher Stand heißt derselbe Wert: eine Antwort, die sich
+        in keinem Feld unterscheidet, trägt dasselbe Kennzeichen, auch wenn sie
+        neu berechnet wurde.
       schema:
         type: string
 
@@ -742,8 +782,9 @@ components:
 
     ApiVersionIncompatible:
       description: |
-        Die Hauptversion im Kopf X-OpenGewerk-Api-Version passt nicht zu der Version,
-        die diese Instanz bedient
+        Die Version im Kopf X-OpenGewerk-Api-Version passt nicht zu der Version, die
+        diese Instanz bedient: die Hauptversionen weichen ab, oder beide stehen auf 0
+        und die Nebenversionen weichen ab
       headers:
         X-OpenGewerk-Api-Version:
           $ref: "#/components/headers/ApiVersion"

@@ -179,3 +179,22 @@ test('an incompatible major version is answered with 409', { skip }, async () =>
   })
   assert.equal(status, 409, 'an unreadable version must not be answered with data')
 })
+
+test('below 1.0.0 the minor decides the same question', { skip }, async () => {
+  // The major is 0 on both sides until the contract is stable, so comparing it
+  // alone compares nothing while the contract may change in every minor.
+  const [major, minor] = contract.info.version.split('.')
+  if (major !== '0') return
+
+  const operation = operations().find((o) => o.path === '/periods').operation
+  const path = '/periods' + requiredQuery(operation)
+  const other = `0.${Number(minor) + 1}.0`
+
+  const stale = await call(path, { headers: { 'X-OpenGewerk-Api-Version': other } })
+  assert.equal(stale.status, 409, `${other} is a different contract than 0.${minor}.x`)
+
+  const own = await call(path, {
+    headers: { 'X-OpenGewerk-Api-Version': contract.info.version },
+  })
+  assert.notEqual(own.status, 409, 'its own version must go through')
+})
