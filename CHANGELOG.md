@@ -52,6 +52,29 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   hat überhaupt keine Abhängigkeiten mehr, damit fällt der ganze Teilbaum weg und die
   Sperre ist nicht umgangen, sondern gegenstandslos
 
+## [0.7.0]
+
+### Hinzugefügt
+
+- `GET /inquiries` und `GET /proposals`. Beide Ressourcen trugen nur ein `post`, damit
+  waren Status, Antworten, Entscheidung und die Kennungen der entstandenen Buchungen für
+  den Absender nach dem Absenden unerreichbar. Das Planungskonzept des Hubs verlangt
+  aber ein Rückfragen-Postfach über alle Mandanten und führt offene Rückfragen in Ampel
+  und Gesundheitsindex, bei einem Cache, der nur Aggregate hält. Mit Cursor, Limit,
+  ETag, Sortierzusage und den vorhandenen Scopes: wer schreiben darf, darf lesen, was er
+  geschrieben hat, und ein neuer Scope müsste erst vom Mandanten freigegeben werden
+- Das Webhook-Ereignis "Vorschlag entschieden". Ohne das bliebe auch mit Leseendpunkt
+  nur Pollen übrig
+
+### Geändert
+
+- `PUT /coa-profile` antwortet mit `state` und `profile` statt mit dem Profil allein.
+  Die 200 hieß "übernommen oder zur Vorschau hinterlegt", und an der Antwort war nicht
+  zu erkennen, welches von beidem: die Vorschau, die das Konzept verspricht, war für die
+  Kanzlei unsichtbar. `state` trägt `applied` oder `pending_preview`
+- Die Operation sagt jetzt, dass nicht genannte Konten unberührt bleiben. Das war die
+  Lesart, sie stand nur nirgends, wo ein Generator sie mitnimmt
+
 ## [0.6.0]
 
 ### Hinzugefügt
