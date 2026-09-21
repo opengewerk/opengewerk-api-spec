@@ -19,6 +19,16 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die README nennt den Prüfbefehl, der auch in der CI läuft: `npm ci` und
+  `npm run lint:openapi` mit der festgelegten Fassung von redocly. Dort stand noch
+  `npx @redocly/cli lint`, das bei jedem Aufruf die neueste Fassung holt
+- Die Konventionen in der README nennen Zeitpunkte in UTC und die Versionsaushandlung
+  über `X-OpenGewerk-Api-Version`, wie `x-konventionen` in der OpenAPI-Datei, und sagen,
+  dass dort die verbindliche Fassung steht. Die Kurzfassung war hinter dem Vertrag
+  zurückgeblieben
+- Die Tabelle der README beschreibt `schemas/` als Ordner der zehn Nutzlasten statt als
+  etwas, das kommen soll. Die Schemas liegen dort seit 0.3.0
+
 - Die Workflow-Dateien folgen der Regel "Code ist immer Englisch": Job-Kennungen,
   Variablen und Kommentare in den eingebetteten Skripten sind englisch. Deutsch bleibt,
   was ein Mensch liest, also die Job- und Schrittnamen in der Actions-Oberfläche und die
@@ -35,6 +45,10 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   kann, meldet irgendwann etwas, das niemand verursacht hat
 
 ### Behoben
+
+- Die Konvention für Anfragen in `schemas/README.md` nannte `$defs/Neu`. Der Vertrag
+  verweist auf `$defs/New`, weil Schlüssel unter `$defs` Code sind und englisch
+  heißen, wie es dieselbe Datei zwei Absätze weiter oben verlangt
 
 - Zwei Fehler im Live-Teil, die erst der Lauf gegen die Attrappe gezeigt hat. Die
   Pflichtparameter `from`, `to` und `as_of` wurden nie gesetzt, weil die Suite noch nach

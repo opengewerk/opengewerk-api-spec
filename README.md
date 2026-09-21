@@ -18,7 +18,7 @@ Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersof
 | Pfad | Inhalt |
 | --- | --- |
 | `openapi/opengewerk-kanzlei-api.yaml` | Die OpenAPI-3.1-Definition der Kanzlei-API |
-| `schemas/` | JSON-Schemas für die Nutzlasten, sobald die Endpunkte inhaltlich ausgearbeitet sind |
+| `schemas/` | JSON-Schemas der zehn Nutzlasten, auf die die OpenAPI-Datei verweist |
 | `conformance/` | Konformitätstests, mit denen eine Implementierung sich selbst prüfen kann |
 | `docs/scopes.md` | Die Scopes, die ein Mandant an eine Kanzlei vergeben kann |
 | `docs/webhooks.md` | Die Ereignisse, die das Mandantensystem an den Hub meldet |
@@ -52,21 +52,25 @@ Verbindlich bleibt die OpenAPI-Datei. Die Suite prüft, ob eine Implementierung 
 3. Die unterstützte Spec-Version im eigenen System sichtbar machen, damit die Gegenseite die Kompatibilität prüfen kann.
 4. Vor jedem Release die eigene Implementierung gegen die Spezifikation prüfen.
 
-Die Datei lässt sich lokal validieren:
+Die Datei lässt sich lokal validieren, mit der Fassung von redocly, die in `package.json` festgelegt ist:
 
 ```bash
-npx @redocly/cli lint openapi/opengewerk-kanzlei-api.yaml
+npm ci
+npm run lint:openapi
 ```
 
-Derselbe Aufruf läuft in der CI dieses Repositories bei jedem Push und jedem Pull Request.
+Derselbe Aufruf läuft in der CI dieses Repositories bei jedem Push und jedem Pull Request. Ein `npx @redocly/cli@latest` holte dagegen jedes Mal die neueste Fassung und könnte eines Tages etwas melden, das niemand verursacht hat.
 
 ## Konventionen
 
 - Alle Beträge sind Integer in Cent, nie Gleitkommazahlen.
-- Alle Datums- und Zeitangaben folgen ISO 8601.
+- Alle Datums- und Zeitangaben folgen ISO 8601, ein Zeitpunkt steht immer in UTC.
 - Steuerschlüssel folgen der DATEV-Konvention, damit der spätere Export verlustfrei bleibt.
 - Listen sind paginiert, unterstützen ETag und `If-None-Match` für effizienten Sync.
 - Schreibende Aufrufe verlangen einen Idempotenz-Key.
+- Jede Antwort nennt im Kopf `X-OpenGewerk-Api-Version` die Version, die die Instanz bedient. Passt die Hauptversion des Hubs nicht dazu, antwortet sie mit HTTP 409 statt mit Daten, die er nicht lesen könnte.
+
+Verbindlich sind die Konventionen unter `x-konventionen` in der OpenAPI-Datei, diese Liste ist ihre Kurzfassung.
 
 ## Mitmachen
 
