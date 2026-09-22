@@ -19,6 +19,10 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die Workflows nehmen die neuesten Hauptversionen der Actions: `actions/checkout` und
+  `actions/setup-node` in v7, CodeQL in v4. Die alten Fassungen liefen noch auf Node 20,
+  dessen Pflege im April 2026 endete, und CodeQL v3 wird im Dezember 2026 abgekündigt
+
 - Die README nennt den Prüfbefehl, der auch in der CI läuft: `npm ci` und
   `npm run lint:openapi` mit der festgelegten Fassung von redocly. Dort stand noch
   `npx @redocly/cli lint`, das bei jedem Aufruf die neueste Fassung holt
