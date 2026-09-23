@@ -62,7 +62,7 @@ test('amounts are integer cents, floating point nowhere', () => {
 
 test('every timestamp is pinned to UTC, not merely to RFC 3339', () => {
   // `format: date-time` alone accepts 2026-09-19T08:00:00+02:00, while
-  // x-konventionen.datumsangaben says UTC. A validator that only knows the
+  // x-conventions.dates says UTC. A validator that only knows the
   // format would let the offset through, and two sides would then disagree by
   // hours about when a document was issued.
   const utc = String.raw`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$`

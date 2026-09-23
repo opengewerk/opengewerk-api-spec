@@ -19,22 +19,22 @@ info:
   license:
     name: Apache-2.0
     identifier: Apache-2.0
-  x-konventionen:
-    betraege: >
+  x-conventions:
+    amounts: >
       Alle Geldbeträge sind ganzzahlige Cent-Werte im Feldtyp integer.
       Gleitkommazahlen sind an keiner Stelle zulässig, weder in Anfragen noch in
       Antworten. Die Währung steht als eigenes Feld nach ISO 4217, Vorgabe EUR.
-    datumsangaben: >
+    dates: >
       Alle Datums- und Zeitangaben folgen ISO 8601. Ein reines Datum wird als
       YYYY-MM-DD übertragen, ein Zeitpunkt als YYYY-MM-DDTHH:MM:SSZ in UTC,
       ein Zeitraum über getrennte Felder von und bis, jeweils einschließlich.
-    steuerschluessel: >
+    tax-codes: >
       Steuerschlüssel folgen der DATEV-Konvention, damit der spätere Export
       verlustfrei bleibt.
-    paginierung: >
+    pagination: >
       Listen sind paginiert und liefern ETag; der Hub sendet If-None-Match und
       bekommt bei unverändertem Stand 304 zurück.
-    versionsaushandlung: >
+    version-negotiation: >
       Jede Antwort trägt den Kopf X-OpenGewerk-Api-Version mit der Version, die
       die Instanz bedient. Der Hub darf denselben Kopf an jeder Anfrage mitschicken,
       um zu sagen, gegen welche Version er gebaut ist. Weichen die Hauptversionen
@@ -43,7 +43,7 @@ info:
       Nebenversion an ihre Stelle: der Vertrag darf sich bis 1.0.0 in jeder
       Nebenversion ändern, ein Vergleich allein der Null wäre bis dahin kein
       Vergleich.
-    idempotenz: >
+    idempotency: >
       Schreibende Aufrufe verlangen den Kopf Idempotency-Key. Ein wiederholter
       Aufruf mit demselben Schlüssel erzeugt keinen zweiten Datensatz, sondern
       liefert das Ergebnis des ersten. Derselbe Schlüssel mit einem abweichenden

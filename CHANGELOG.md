@@ -19,6 +19,12 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die Erweiterung mit den Konventionen heißt jetzt `x-conventions`, ihre Schlüssel sind
+  englisch: `amounts`, `dates`, `tax-codes`, `pagination`, `version-negotiation` und
+  `idempotency` (#18). Feldnamen und Schlüssel sind in diesem Vertrag englisch, nur die
+  Beschreibungen deutsch, und zwei der alten Schlüssel schrieben Umlaute um, weshalb die
+  Prüfung "Schreibweise" für sie eine Ausnahme brauchte; die ist entfallen. Am Verhalten
+  ändert sich nichts, die Erweiterung beschreibt die Konventionen nur
 - Die Workflows nehmen die neuesten Hauptversionen der Actions: `actions/checkout` und
   `actions/setup-node` in v7, CodeQL in v4. Die alten Fassungen liefen noch auf Node 20,
   dessen Pflege im April 2026 endete, und CodeQL v3 wird im Dezember 2026 abgekündigt
