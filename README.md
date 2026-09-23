@@ -27,6 +27,8 @@ Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersof
 
 Die Spezifikation folgt der [Semantischen Versionierung](https://semver.org/lang/de/). Die aktuelle Version steht im `info.version`-Feld der OpenAPI-Datei.
 
+Jede Version erscheint mit ihrem Tag `vX.Y.Z`, an den sich eine Implementierung binden kann. Sobald eine geänderte `info.version` auf `main` ist, legt der Workflow "Vertragsversion veröffentlichen" den Tag mit einem Release an, dessen Notizen der Abschnitt der Version im CHANGELOG sind. Vorher prüft die CI im Pull Request, dass es diesen Abschnitt gibt, dass die Version nur vorwärts geht und dass ihr Tag noch frei ist. Die Tags `v0.2.0` bis `v0.7.0` sind am 23.09.2026 nachträglich auf die Commits gesetzt, mit denen die Versionen kamen.
+
 Ein **Breaking Change** und damit eine neue Hauptversion ist:
 
 - Ein Endpunkt oder eine Operation fällt weg oder wird umbenannt.

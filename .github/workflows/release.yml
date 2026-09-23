@@ -1,0 +1,87 @@
+name: Vertragsversion veröffentlichen
+
+# Every version of the contract appears with its tag, v<version>, so that an
+# implementation can bind itself to one (ADR 0001 in opengewerk/opengewerk).
+# The tag comes with a release whose notes are the version's section in the
+# changelog. The pull request that raised the version was checked in ci.yml:
+# the section exists, the version goes forward and has no tag yet.
+#
+# The tag is created through the release, on the commit that main points at.
+# That commit is the squash merge GitHub signed, so the tag names a verified
+# commit; a tag object pushed from here would carry nobody's signature.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - openapi/opengewerk-kanzlei-api.yaml
+      - CHANGELOG.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag und Release zur Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v7
+
+      - name: Version veröffentlichen, wenn sie neu ist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import re
+          import subprocess
+          import sys
+
+          SPEC = "openapi/opengewerk-kanzlei-api.yaml"
+
+          with open(SPEC, encoding="utf-8") as spec:
+              found = re.search(r"^  version: (\d+\.\d+\.\d+)$", spec.read(), re.M)
+          if not found:
+              sys.exit(f"In {SPEC} steht unter info.version keine Version der Form X.Y.Z.")
+
+          version = found.group(1)
+          tag = f"v{version}"
+
+          existing = subprocess.run(
+              ["git", "ls-remote", "--tags", "origin", tag],
+              capture_output=True, text=True, check=True,
+          ).stdout
+          if existing.strip():
+              print(f"{tag} ist schon veröffentlicht, es gibt nichts zu tun.")
+              sys.exit(0)
+
+          # The section of this version, from its heading to the next one.
+          with open("CHANGELOG.md", encoding="utf-8") as changelog:
+              text = changelog.read()
+          section = re.search(
+              rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)", text, re.M | re.S
+          )
+          if not section:
+              sys.exit(f"CHANGELOG.md hat keinen Abschnitt für {version}, so gibt es keine Notizen.")
+
+          with open("notes.md", "w", encoding="utf-8") as notes:
+              notes.write(section.group(1).strip() + "\n")
+
+          subprocess.run(
+              [
+                  "gh", "release", "create", tag,
+                  "--target", subprocess.run(
+                      ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+                  ).stdout.strip(),
+                  "--title", f"Vertragsversion {version}",
+                  "--notes-file", "notes.md",
+              ],
+              check=True,
+          )
+          print(f"{tag} ist veröffentlicht.")
+          PY
