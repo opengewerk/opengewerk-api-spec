@@ -25,6 +25,9 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die Vorlage für einen Fehlerbericht sagt, was dieses Repository enthält, statt von einem
+  Projekt in der Planungsphase ohne lauffähigen Code zu sprechen. Die Anwendung läuft
+  inzwischen, und ein Fehler im Vertrag ist keiner der Anwendung
 - Die Erweiterung mit den Konventionen heißt jetzt `x-conventions`, ihre Schlüssel sind
   englisch: `amounts`, `dates`, `tax-codes`, `pagination`, `version-negotiation` und
   `idempotency` (#18). Feldnamen und Schlüssel sind in diesem Vertrag englisch, nur die

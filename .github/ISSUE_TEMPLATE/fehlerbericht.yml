@@ -6,9 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Danke, dass du dir die Zeit nimmst. Das Projekt ist in der Planungsphase,
-        es gibt noch keinen lauffähigen Code. Fehlerberichte betreffen daher
-        aktuell vor allem die Dokumente und die Spezifikation.
+        Danke, dass du dir die Zeit nimmst. Hier liegt der Vertrag zwischen der
+        Anwendung und dem Kanzlei-Hub: die OpenAPI-Datei, die Schemas und die
+        Konformitätstests. Ein Fehlerbericht betrifft einen davon oder die Dokumentation.
 
   - type: textarea
     id: beschreibung
