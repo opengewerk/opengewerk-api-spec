@@ -70,7 +70,7 @@ Derselbe Aufruf läuft in der CI dieses Repositories bei jedem Push und jedem Pu
 - Schreibende Aufrufe verlangen einen Idempotenz-Key.
 - Jede Antwort nennt im Kopf `X-OpenGewerk-Api-Version` die Version, die die Instanz bedient. Passt die Hauptversion des Hubs nicht dazu, antwortet sie mit HTTP 409 statt mit Daten, die er nicht lesen könnte.
 
-Verbindlich sind die Konventionen unter `x-konventionen` in der OpenAPI-Datei, diese Liste ist ihre Kurzfassung.
+Verbindlich sind die Konventionen unter `x-conventions` in der OpenAPI-Datei, diese Liste ist ihre Kurzfassung.
 
 ## Mitmachen
 
