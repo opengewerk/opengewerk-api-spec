@@ -9,6 +9,12 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Hinzugefügt
 
+- Jede Vertragsversion erscheint mit ihrem Tag (#17). Der neue Workflow "Vertragsversion
+  veröffentlichen" legt zu einer geänderten `info.version` auf `main` den Tag `vX.Y.Z` mit
+  einem Release an, die Notizen aus dem Abschnitt der Version hier. Der Job "OpenAPI-Definition
+  validieren" prüft im Pull Request, dass es den Abschnitt gibt, die Version nur vorwärts geht
+  und ihr Tag noch frei ist. `v0.2.0` bis `v0.7.0` sind nachträglich gesetzt. ADR 0001 bindet
+  die Anwendungen an eine getaggte Version, getaggt war bis dahin keine
 - Initiales Repository-Gerüst
 - CI-Job "Schreibweise", der Gedankenstriche im gesamten Repository meldet
 - Attrappe `conformance/fixture-instance.mjs`, die den Vertrag beantwortet, dazu die

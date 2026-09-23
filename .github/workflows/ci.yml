@@ -102,6 +102,80 @@ jobs:
       - name: OpenAPI-Datei prüfen
         run: npm run lint:openapi
 
+      # A version in the contract is published as the tag v<version> once it is
+      # on main (release.yml). What a pull request can get wrong before that is
+      # checked here: a version without its section in the changelog, which
+      # is what the release is written from, a version that goes back, and one
+      # that was published already and would get a second state under its tag.
+      - name: Vertragsversion prüfen
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -n "$BASE_REF" ]; then git fetch --quiet --depth=1 origin "$BASE_REF"; fi
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+          import sys
+
+          SPEC = "openapi/opengewerk-kanzlei-api.yaml"
+          VERSION = re.compile(r"^  version: (\d+)\.(\d+)\.(\d+)$", re.M)
+
+
+          def version_of(text):
+              found = VERSION.search(text)
+              if not found:
+                  sys.exit(f"In {SPEC} steht unter info.version keine Version der Form X.Y.Z.")
+              return tuple(int(part) for part in found.groups())
+
+
+          def spelled(version):
+              return ".".join(str(part) for part in version)
+
+
+          def git(*arguments):
+              return subprocess.run(
+                  ["git", *arguments], capture_output=True, text=True, check=True
+              ).stdout
+
+
+          with open(SPEC, encoding="utf-8") as spec:
+              current = version_of(spec.read())
+          with open("CHANGELOG.md", encoding="utf-8") as changelog:
+              sections = changelog.read()
+
+          problems = []
+
+          if f"## [{spelled(current)}]" not in sections:
+              problems.append(
+                  f"CHANGELOG.md hat keinen Abschnitt \"## [{spelled(current)}]\" "
+                  "für die Version im Vertrag."
+              )
+
+          base_ref = os.environ.get("BASE_REF", "")
+
+          if base_ref:
+              base = version_of(git("show", f"origin/{base_ref}:{SPEC}"))
+
+              if current < base:
+                  problems.append(
+                      f"Die Version geht zurück, von {spelled(base)} auf {spelled(current)}."
+                  )
+              elif current > base and git("ls-remote", "--tags", "origin", f"v{spelled(current)}").strip():
+                  problems.append(
+                      f"Den Tag v{spelled(current)} gibt es schon. Eine veröffentlichte Version "
+                      "bekommt keinen zweiten Stand, die Änderung braucht eine neue Nummer."
+                  )
+
+          for problem in problems:
+              print(problem)
+
+          if problems:
+              sys.exit(1)
+
+          print(f"Vertragsversion {spelled(current)} ist in Ordnung.")
+          PY
+
   typography:
     name: Schreibweise
     runs-on: ubuntu-latest
