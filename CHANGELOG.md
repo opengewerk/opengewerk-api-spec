@@ -62,6 +62,13 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 - Die CI prüft die OpenAPI-Datei mit der im Projekt festgelegten redocly-Version statt
   mit `npx @redocly/cli@latest`. Eine Prüfung, deren Werkzeug sich ohne Commit ändern
   kann, meldet irgendwann etwas, das niemand verursacht hat
+- Das Security-Review jedes Pull Requests läuft in GitHub Actions, mit dem Workflow der
+  Organisation (`opengewerk/.github#27`): für einen Branch dieses Repositorys von einem Mitglied
+  voll, für einen PR von außen nur lesend und erst nach der Freigabe eines Maintainers. Geprüft
+  wird der neueste Commit, ein neuer Push bricht den Lauf davor ab; das Ergebnis steht als
+  Kommentar am PR und als Status `PR-Security-Review`. Der Aufruf heftet einen Commit des
+  Workflows an. Bisher lief das Review auf dem Rechner von Moritz mit einem kostenlosen
+  Modell, dessen Kontingent am 10.10.2026 aufgebraucht war
 
 ### Behoben
 
