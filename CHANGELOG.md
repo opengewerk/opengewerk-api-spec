@@ -82,9 +82,9 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   Vorher war Docker ein zweiter Weg zu root, und eine Git-Konfiguration aus der Sandbox hätte nach
   ihr außerhalb laufen können.
 - Das Security-Review kann Tests ausführen: es erreicht die Registry über den Proxy seiner Sandbox,
-  findet `pnpm` im Pfad und installiert in einer Kopie des Checkouts (`opengewerk/.github#38`,
-  Aufruf angehoben). Vorher ließ sich in der Sandbox nichts installieren. Eine Datenbank bekommt
-  das Review hier nicht, weil der Aufruf keine nennt.
+  findet `pnpm` im Pfad und installiert in einer Kopie des Checkouts (`opengewerk/.github#38` und
+  `#40`, Aufruf angehoben). Vorher ließ sich in der Sandbox nichts installieren. Eine Datenbank
+  bekommt das Review hier nicht, weil der Aufruf keine nennt.
 
 ### Behoben
 
