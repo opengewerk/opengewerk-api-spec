@@ -80,7 +80,11 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   `actions/checkout` dort git aufruft. Lässt sich das Review am PR nicht ablegen, steht der Status
   auf `error` statt dauerhaft auf "läuft" (`opengewerk/.github#35` und `#36`, Aufruf angehoben).
   Vorher war Docker ein zweiter Weg zu root, und eine Git-Konfiguration aus der Sandbox hätte nach
-  ihr außerhalb laufen können
+  ihr außerhalb laufen können.
+- Das Security-Review kann Tests ausführen: es erreicht die Registry über den Proxy seiner Sandbox,
+  findet `pnpm` im Pfad und installiert in einer Kopie des Checkouts (`opengewerk/.github#38`,
+  Aufruf angehoben). Vorher ließ sich in der Sandbox nichts installieren. Eine Datenbank bekommt
+  das Review hier nicht, weil der Aufruf keine nennt.
 
 ### Behoben
 
