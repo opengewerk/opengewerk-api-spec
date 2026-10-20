@@ -85,6 +85,8 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
   findet `pnpm` im Pfad und installiert in einer Kopie des Checkouts (`opengewerk/.github#38` und
   `#40`, Aufruf angehoben). Vorher ließ sich in der Sandbox nichts installieren. Eine Datenbank
   bekommt das Review hier nicht, weil der Aufruf keine nennt.
+- Das Security-Review steht auf `731e352` von opengewerk/.github (opengewerk/.github#45), dem Stand, der ein
+  angehobenes Submodul selbst belegt, wie in den übrigen Repositories der Organisation.
 
 ### Behoben
 
