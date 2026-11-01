@@ -5,11 +5,11 @@
   </picture>
 </p>
 
-<p align="center"><strong>Gemeinsamer API-Vertrag zwischen OpenGewerk und OpenGewerk Kanzlei</strong></p>
+<p align="center"><strong>Offener API-Vertrag zwischen der Handwerkersoftware OpenGewerk und dem Kanzlei-Hub für Steuerberater</strong></p>
 
 ## Zweck
 
-Die Handwerkersoftware [`opengewerk`](https://github.com/opengewerk/opengewerk) und der Kanzlei-Hub [`opengewerk-kanzlei`](https://github.com/opengewerk/opengewerk-kanzlei) sind eigenständige Projekte mit eigenen Releases. Damit sie sich nicht gegenseitig brechen, liegt der Schnittstellenvertrag in diesem dritten Repository: OpenAPI-Definition, JSON-Schemas und Konformitätstests an einer Stelle, versioniert nach SemVer. Beide Seiten deklarieren, welche Version der Spezifikation sie unterstützen, und können unabhängig voneinander veröffentlichen.
+Die Open-Source-Handwerkersoftware [`opengewerk`](https://github.com/opengewerk/opengewerk), self-hosted CRM und ERP für Handwerksbetriebe, und der Kanzlei-Hub [`opengewerk-kanzlei`](https://github.com/opengewerk/opengewerk-kanzlei) für Steuerberater sind eigenständige Projekte mit eigenen Releases. Damit sie sich nicht gegenseitig brechen, liegt der Schnittstellenvertrag in diesem dritten Repository: OpenAPI-3.1-Definition, JSON-Schemas und Konformitätstests an einer Stelle, versioniert nach SemVer und unter der Apache-2.0 offen für jede Implementierung. Beide Seiten deklarieren, welche Version der Spezifikation sie unterstützen, und können unabhängig voneinander veröffentlichen.
 
 Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersoftware ist damit der Server dieser Spezifikation, der Hub ist der Client. Welche Ressourcen ein Hub sehen darf, entscheidet allein der Mandant über Scopes.
 
@@ -27,7 +27,7 @@ Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersof
 
 Die Spezifikation folgt der [Semantischen Versionierung](https://semver.org/lang/de/). Die aktuelle Version steht im `info.version`-Feld der OpenAPI-Datei.
 
-Jede Version erscheint mit ihrem Tag `vX.Y.Z`, an den sich eine Implementierung binden kann. Sobald eine geänderte `info.version` auf `main` ist, legt der Workflow "Vertragsversion veröffentlichen" den Tag mit einem Release an, dessen Notizen der Abschnitt der Version im CHANGELOG sind. Vorher prüft die CI im Pull Request, dass es diesen Abschnitt gibt, dass die Version nur vorwärts geht und dass ihr Tag noch frei ist. Die Tags `v0.2.0` bis `v0.7.0` sind am 23.09.2026 nachträglich auf die Commits gesetzt, mit denen die Versionen kamen.
+Jede Version erscheint mit ihrem Tag `vX.Y.Z`, an den sich eine Implementierung binden kann. Sobald eine geänderte `info.version` auf `main` ist, legt der Workflow "Vertragsversion veröffentlichen" den Tag mit einem Release an, dessen Notizen der Abschnitt der Version im CHANGELOG sind. Vorher prüft die CI im Pull Request, dass es diesen Abschnitt gibt, dass die Version nur vorwärts geht und dass ihr Tag noch frei ist.
 
 Ein **Breaking Change** und damit eine neue Hauptversion ist:
 
