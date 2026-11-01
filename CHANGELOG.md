@@ -25,6 +25,11 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die README sagt in Kopf und erstem Absatz, wofür die beiden Seiten stehen (die
+  Open-Source-Handwerkersoftware mit CRM und ERP, der Hub für Steuerberater) und dass der
+  Vertrag unter der Apache-2.0 offen ist. Warum: wer über eine Suche hier landet, sah bisher
+  nur zwei Produktnamen. Der Satz zu den nachträglich gesetzten Tags `v0.2.0` bis `v0.7.0`
+  steht nur noch hier im CHANGELOG
 - Die Vorlage für einen Fehlerbericht sagt, was dieses Repository enthält, statt von einem
   Projekt in der Planungsphase ohne lauffähigen Code zu sprechen. Die Anwendung läuft
   inzwischen, und ein Fehler im Vertrag ist keiner der Anwendung
