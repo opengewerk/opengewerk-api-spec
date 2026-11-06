@@ -9,6 +9,9 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Hinzugefügt
 
+- Jeder Push auf `main`, jeder Tag und jedes Löschen eines Zweigs wird nach Codeberg gespiegelt
+  (codeberg.org/OpenGewerk), über einen Deploy Key nur für dieses Repository. Warum: der Code soll
+  auch außerhalb von GitHub liegen; GitHub bleibt die Quelle, auf Codeberg wird nichts gepflegt.
 - Jede Vertragsversion erscheint mit ihrem Tag (#17). Der neue Workflow "Vertragsversion
   veröffentlichen" legt zu einer geänderten `info.version` auf `main` den Tag `vX.Y.Z` mit
   einem Release an, die Notizen aus dem Abschnitt der Version hier. Der Job "OpenAPI-Definition
