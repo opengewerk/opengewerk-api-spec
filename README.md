@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/opengewerk/.github/main/brand/opengewerk-logo-dark.svg">
-    <img alt="OpenGewerk" src="https://raw.githubusercontent.com/opengewerk/.github/main/brand/opengewerk-logo.svg" width="320">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/OpenGewerk/.github/main/brand/opengewerk-logo-dark.svg">
+    <img alt="OpenGewerk" src="https://raw.githubusercontent.com/OpenGewerk/.github/main/brand/opengewerk-logo.svg" width="320">
   </picture>
 </p>
 
@@ -9,7 +9,7 @@
 
 ## Zweck
 
-Die Open-Source-Handwerkersoftware [`opengewerk`](https://github.com/opengewerk/opengewerk), self-hosted CRM und ERP für Handwerksbetriebe, und der Kanzlei-Hub [`opengewerk-kanzlei`](https://github.com/opengewerk/opengewerk-kanzlei) für Steuerberater sind eigenständige Projekte mit eigenen Releases. Damit sie sich nicht gegenseitig brechen, liegt der Schnittstellenvertrag in diesem dritten Repository: OpenAPI-3.1-Definition, JSON-Schemas und Konformitätstests an einer Stelle, versioniert nach SemVer und unter der Apache-2.0 offen für jede Implementierung. Beide Seiten deklarieren, welche Version der Spezifikation sie unterstützen, und können unabhängig voneinander veröffentlichen.
+Die Open-Source-Handwerkersoftware [`opengewerk`](https://github.com/OpenGewerk/opengewerk), self-hosted CRM und ERP für Handwerksbetriebe, und der Kanzlei-Hub [`opengewerk-kanzlei`](https://github.com/OpenGewerk/opengewerk-kanzlei) für Steuerberater sind eigenständige Projekte mit eigenen Releases. Damit sie sich nicht gegenseitig brechen, liegt der Schnittstellenvertrag in diesem dritten Repository: OpenAPI-3.1-Definition, JSON-Schemas und Konformitätstests an einer Stelle, versioniert nach SemVer und unter der Apache-2.0 offen für jede Implementierung. Beide Seiten deklarieren, welche Version der Spezifikation sie unterstützen, und können unabhängig voneinander veröffentlichen.
 
 Der Hub ruft die Endpunkte beim Mandanten ab, nicht umgekehrt. Die Handwerkersoftware ist damit der Server dieser Spezifikation, der Hub ist der Client. Welche Ressourcen ein Hub sehen darf, entscheidet allein der Mandant über Scopes.
 
@@ -76,9 +76,9 @@ Verbindlich sind die Konventionen unter `x-conventions` in der OpenAPI-Datei, di
 
 ## Mitmachen
 
-- Fragen und Vorschläge zum Vertrag gehören in die [Discussions](https://github.com/opengewerk/opengewerk-api-spec/discussions).
-- Konkrete Fehler und Wünsche laufen über die [Issue-Vorlagen](https://github.com/opengewerk/opengewerk-api-spec/issues/new/choose).
-- Die Beitragsregeln stehen in [CONTRIBUTING.md](https://github.com/opengewerk/.github/blob/main/CONTRIBUTING.md), der Verhaltenskodex in [CODE_OF_CONDUCT.md](https://github.com/opengewerk/.github/blob/main/CODE_OF_CONDUCT.md).
+- Fragen und Vorschläge zum Vertrag gehören in die [Discussions](https://github.com/OpenGewerk/opengewerk-api-spec/discussions).
+- Konkrete Fehler und Wünsche laufen über die [Issue-Vorlagen](https://github.com/OpenGewerk/opengewerk-api-spec/issues/new/choose).
+- Die Beitragsregeln stehen in [CONTRIBUTING.md](https://github.com/OpenGewerk/.github/blob/main/CONTRIBUTING.md), der Verhaltenskodex in [CODE_OF_CONDUCT.md](https://github.com/OpenGewerk/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## Lizenz
 
