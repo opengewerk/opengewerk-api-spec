@@ -25,6 +25,9 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Das Security-Review steht auf `e53047a` von OpenGewerk/.github (OpenGewerk/.github#50) und wird
+  unter dem neuen Namen der Organisation aufgerufen. Der Stand nimmt den Namen im Pin und in einer
+  Submodul-Adresse in beiden Schreibweisen an.
 - Die Organisation auf GitHub heißt jetzt OpenGewerk statt opengewerk, die Links in README und
   Dokumentation zeigen auf den neuen Namen. Die alten Adressen leitet GitHub weiter.
 - Die README sagt in Kopf und erstem Absatz, wofür die beiden Seiten stehen (die
