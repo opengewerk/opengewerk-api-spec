@@ -25,6 +25,8 @@ die Versionsnummern folgen der [Semantischen Versionierung](https://semver.org/l
 
 ### Geändert
 
+- Die Organisation auf GitHub heißt jetzt OpenGewerk statt opengewerk, die Links in README und
+  Dokumentation zeigen auf den neuen Namen. Die alten Adressen leitet GitHub weiter.
 - Die README sagt in Kopf und erstem Absatz, wofür die beiden Seiten stehen (die
   Open-Source-Handwerkersoftware mit CRM und ERP, der Hub für Steuerberater) und dass der
   Vertrag unter der Apache-2.0 offen ist. Warum: wer über eine Suche hier landet, sah bisher
